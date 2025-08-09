@@ -1,0 +1,146 @@
+html ,body {
+  font-family: Arial, sans-serif;
+  background: #f8f9fa;
+  margin: 0;
+  padding: 0;
+}
+
+.app {
+  min-height: 100vh;
+    width: 100vw; /* Add this line */
+
+}
+
+.navbar {
+  display: flex;
+  align-items: center; /* vertically centers logo & links */
+  justify-content: space-between;
+  width: 100%;  
+  min-height: 60px; /* better height than fixed 40px */
+  padding: 0 20px;
+  background: #007bff;
+  color: white;
+  box-sizing: border-box; /* ensures padding doesn't overflow */
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  font-size: 1.5rem;
+}
+
+.navbar-right a {
+  color: white;
+  text-decoration: none;
+  margin-left: 20px;
+}
+
+.navbar-right a:hover {
+  text-decoration: underline;
+}
+
+.container {
+  padding: 20px;
+}
+
+.new-btn {
+  background: #28a745;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 15px;
+  border-radius: 5px;
+}
+
+.new-btn:hover {
+  background: #218838;
+}
+
+.form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.form input, .form select {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form button {
+  background: #007bff;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.form button:hover {
+  background: #0056b3;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.apply-btn {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.apply-btn:hover {
+  background: #138496;
+}
+
+.delete-btn {
+  background: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: darkred;
+}
+
+/* Status colors */
+.status.pending {
+  background: #ffc107;
+}
+
+.status.applied {
+  background: #17a2b8;
+  color: white;
+}
+
+.status.success {
+  background: #28a745;
+  color: white;
+}
+
+.status.rejected {
+  background: #dc3545;
+  color: white;
+}
