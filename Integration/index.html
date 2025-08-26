@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAL India - Property Management System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <h2>NAL India</h2>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active" data-view="dashboard">
+                        <span>Dashboard</span>
+                    </li>
+                    <li class="nav-item" data-view="properties">
+                        <span>Manage Properties</span>
+                    </li>
+                    <li class="nav-item" data-view="notifications">
+                        <span>Notifications</span>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="view active">
+                <header class="dashboard-header">
+                    <div class="header-content">
+                        <h1>Property Management Dashboard</h1>
+                        <button class="btn btn--primary" id="add-property-btn">Add Property</button>
+                    </div>
+                </header>
+
+                <div class="property-grid" id="property-grid">
+                    <!-- Properties will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Add Property Form -->
+            <div id="add-property-form" class="view hidden">
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2>Add New Property</h2>
+                        <div class="form-progress">
+                            <div class="progress-steps">
+                                <div class="step active" data-step="1">1</div>
+                                <div class="step" data-step="2">2</div>
+                                <div class="step" data-step="3">3</div>
+                                <div class="step" data-step="4">4</div>
+                                <div class="step" data-step="5">5</div>
+                                <div class="step" data-step="6">6</div>
+                                <div class="step" data-step="7">7</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="property-form">
+                        <!-- Step 1: Property Details -->
+                        <div class="form-step active" data-step="1">
+                            <h3>Property Details</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Address</label>
+                                    <input type="text" class="form-control" name="address" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Property Type</label>
+                                    <select class="form-control" name="propertyType" required>
+                                        <option value="">Select Type</option>
+                                        <option value="apartment">Apartment</option>
+                                        <option value="villa">Villa</option>
+                                        <option value="plot">Plot</option>
+                                        <option value="commercial">Commercial</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Bedrooms</label>
+                                    <input type="number" class="form-control" name="bedrooms" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Bathrooms</label>
+                                    <input type="number" class="form-control" name="bathrooms" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Square Footage</label>
+                                    <input type="number" class="form-control" name="area" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Lot Size (sq.ft.)</label>
+                                    <input type="number" class="form-control" name="lotSize">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Year Built</label>
+                                    <input type="number" class="form-control" name="yearBuilt" min="1900" max="2025">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Price (₹)</label>
+                                    <input type="number" class="form-control" name="price" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Documents -->
+                        <div class="form-step hidden" data-step="2">
+                            <h3>Upload Documents</h3>
+                            <div class="upload-section">
+                                <div class="upload-item">
+                                    <label class="form-label">Sale Deed</label>
+                                    <input type="file" class="form-control" name="saleDeed" accept=".pdf,.jpg,.png">
+                                </div>
+                                <div class="upload-item">
+                                    <label class="form-label">Khata</label>
+                                    <input type="file" class="form-control" name="khata" accept=".pdf,.jpg,.png">
+                                </div>
+                                <div class="upload-item">
+                                    <label class="form-label">Tax Receipt</label>
+                                    <input type="file" class="form-control" name="taxReceipt" accept=".pdf,.jpg,.png">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Listing Intent -->
+                        <div class="form-step hidden" data-step="3">
+                            <h3>Listing Intent</h3>
+                            <div class="intent-options">
+                                <label class="radio-option">
+                                    <input type="radio" name="listingIntent" value="sale" required>
+                                    <div class="radio-content">
+                                        <strong>For Sale</strong>
+                                        <p>List property for sale</p>
+                                    </div>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="listingIntent" value="rent" required>
+                                    <div class="radio-content">
+                                        <strong>For Rent</strong>
+                                        <p>List property for rental</p>
+                                    </div>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="listingIntent" value="urgent" required>
+                                    <div class="radio-content">
+                                        <strong>Urgent Sale</strong>
+                                        <p>Fast track sale option</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Property Type Selection -->
+                        <div class="form-step hidden" data-step="4">
+                            <h3>Property Type Selection</h3>
+                            <div class="type-grid">
+                                <label class="type-option">
+                                    <input type="radio" name="propertyCategory" value="apartment" required>
+                                    <div class="type-card">
+                                        <h4>Apartment</h4>
+                                        <p>Multi-unit residential building</p>
+                                    </div>
+                                </label>
+                                <label class="type-option">
+                                    <input type="radio" name="propertyCategory" value="villa" required>
+                                    <div class="type-card">
+                                        <h4>Villa</h4>
+                                        <p>Independent house with garden</p>
+                                    </div>
+                                </label>
+                                <label class="type-option">
+                                    <input type="radio" name="propertyCategory" value="plot" required>
+                                    <div class="type-card">
+                                        <h4>Plot</h4>
+                                        <p>Vacant land for construction</p>
+                                    </div>
+                                </label>
+                                <label class="type-option">
+                                    <input type="radio" name="propertyCategory" value="commercial" required>
+                                    <div class="type-card">
+                                        <h4>Commercial</h4>
+                                        <p>Office, retail, or business space</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Step 5: Location Details -->
+                        <div class="form-step hidden" data-step="5">
+                            <h3>Location Details</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">City</label>
+                                    <input type="text" class="form-control" name="city" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">State</label>
+                                    <input type="text" class="form-control" name="state" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Zip Code</label>
+                                    <input type="text" class="form-control" name="zipCode" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Possession</label>
+                                    <select class="form-control" name="possession" required>
+                                        <option value="">Select Possession</option>
+                                        <option value="immediate">Immediate</option>
+                                        <option value="3months">Within 3 months</option>
+                                        <option value="6months">Within 6 months</option>
+                                        <option value="1year">Within 1 year</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Amenities</label>
+                                <div class="amenities-grid">
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="amenities" value="parking">
+                                        <span>Parking</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="amenities" value="gym">
+                                        <span>Gym</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="amenities" value="pool">
+                                        <span>Swimming Pool</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="amenities" value="garden">
+                                        <span>Garden</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 6: Photos & Videos -->
+                        <div class="form-step hidden" data-step="6">
+                            <h3>Photos & Videos Upload</h3>
+                            <div class="upload-section">
+                                <div class="upload-item">
+                                    <label class="form-label">Property Photos</label>
+                                    <input type="file" class="form-control" name="photos" multiple accept="image/*">
+                                    <small>Upload multiple photos of your property</small>
+                                </div>
+                                <div class="upload-item">
+                                    <label class="form-label">Property Video</label>
+                                    <input type="file" class="form-control" name="video" accept="video/*">
+                                    <small>Upload a video tour (optional)</small>
+                                </div>
+                                <div class="geo-verification">
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="geoVerification" value="enabled">
+                                        <span>Enable geo-verification for photos</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 7: Final Options -->
+                        <div class="form-step hidden" data-step="7">
+                            <h3>Final Review</h3>
+                            
+                            <!-- Urgent Sale Warning -->
+                            <div id="urgent-sale-warning" class="warning-card hidden">
+                                <h4>Urgent Sale - Pricing Advisory</h4>
+                                <p>Properties marked for urgent sale should be priced competitively to attract quick buyers. Consider market research and property condition when setting the price.</p>
+                                <div class="warning-actions">
+                                    <button type="button" class="btn btn--sm btn--secondary">Market Analysis</button>
+                                    <button type="button" class="btn btn--sm btn--outline">Pricing Guide</button>
+                                </div>
+                            </div>
+
+                            <div class="final-options">
+                                <div class="option-card">
+                                    <label class="toggle-option">
+                                        <input type="checkbox" name="urgentSale" id="urgent-sale-toggle">
+                                        <span class="toggle-slider"></span>
+                                        <div class="toggle-content">
+                                            <strong>Enable Urgent Sale</strong>
+                                            <p>Fast-track your property sale</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                
+                                <div class="option-card">
+                                    <label class="toggle-option">
+                                        <input type="checkbox" name="enableBidding" id="bidding-toggle">
+                                        <span class="toggle-slider"></span>
+                                        <div class="toggle-content">
+                                            <strong>Enable Bidding</strong>
+                                            <p>Allow buyers to bid on your property</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="declaration-section">
+                                <h4>Declaration</h4>
+                                <label class="checkbox-option declaration">
+                                    <input type="checkbox" name="declaration" required>
+                                    <span>I declare that all information provided is accurate and I have the legal authority to list this property.</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-navigation">
+                            <button type="button" class="btn btn--outline" id="prev-btn" disabled>Previous</button>
+                            <button type="button" class="btn btn--primary" id="next-btn">Next</button>
+                            <button type="submit" class="btn btn--primary hidden" id="submit-btn">Submit Property</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bidding Dashboard -->
+            <div id="bidding-dashboard" class="view hidden">
+                <div class="bidding-container">
+                    <div class="bidding-header">
+                        <button class="btn btn--outline" id="back-to-dashboard">← Back to Properties</button>
+                        <h2>Property Bidding Dashboard</h2>
+                    </div>
+
+                    <div class="bidding-content">
+                        <div class="property-summary" id="bidding-property-summary">
+                            <!-- Property details will be injected here -->
+                        </div>
+
+                        <div class="auction-info">
+                            <div class="countdown-timer" id="countdown-timer">
+                                <h3>Auction Ends In:</h3>
+                                <div class="timer-display">
+                                    <div class="time-unit">
+                                        <span class="time-value" id="days">00</span>
+                                        <span class="time-label">Days</span>
+                                    </div>
+                                    <div class="time-unit">
+                                        <span class="time-value" id="hours">00</span>
+                                        <span class="time-label">Hours</span>
+                                    </div>
+                                    <div class="time-unit">
+                                        <span class="time-value" id="minutes">00</span>
+                                        <span class="time-label">Minutes</span>
+                                    </div>
+                                    <div class="time-unit">
+                                        <span class="time-value" id="seconds">00</span>
+                                        <span class="time-label">Seconds</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bid-controls">
+                                <div class="bid-stats">
+                                    <div class="stat">
+                                        <strong id="total-bids">3</strong>
+                                        <span>Total Bids</span>
+                                    </div>
+                                    <div class="stat">
+                                        <strong id="highest-bid">₹72,50,000</strong>
+                                        <span>Highest Bid</span>
+                                    </div>
+                                </div>
+                                <div class="sort-options">
+                                    <label>Sort by:</label>
+                                    <select id="sort-bids" class="form-control">
+                                        <option value="amount">Highest Amount</option>
+                                        <option value="time">Recent First</option>
+                                        <option value="deposit">Highest Deposit</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bids-list" id="bids-list">
+                            <!-- Bids will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+                <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Seller Bidding Dashboard - NAL India</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Reset & base */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f7f9 0%, #e4e8ed 100%);
+      color: #333;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    a { color: #2c7be5; text-decoration: none; cursor: pointer; }
+
+    /* Container */
+    .container {
+      max-width: 1100px;
+      margin: 1.5rem auto 3rem;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      padding: 25px 35px 35px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Ribbon */
+    .ribbon {
+      position: absolute;
+      top: 20px;
+      right: -35px;
+      transform: rotate(45deg);
+      background: #2c7be5;
+      color: white;
+      padding: 8px 40px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    }
+    .ribbon.ended {
+      background: #6c757d;
+    }
+
+    /* Property Details */
+    .property-summary {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+      border-bottom: 1px solid #eaeef2;
+      padding-bottom: 25px;
+      margin-bottom: 25px;
+    }
+    .property-summary img {
+      width: 160px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+    .property-summary img:hover { transform: scale(1.03); }
+    .property-info { flex: 1; }
+    .property-name { font-size: 1.7rem; font-weight: 700; color: #2c7be5; margin-bottom: 8px; }
+    .property-location { font-size: 1.05rem; color: #6e84a3; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .property-features { font-size: 0.95rem; color: #555; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .property-status { display: inline-block; background: #2c7be5; color: white; padding: 5px 12px; font-size: 0.9rem; border-radius: 16px; font-weight: 600; }
+    .feature-tag { display: inline-flex; align-items: center; gap: 6px; background: #f3f7ff; padding: 4px 10px; border-radius: 12px; font-size: 0.9rem; }
+
+    /* Timer */
+    .timer-container { display: flex; flex-direction: column; align-items: center; margin-left: auto; min-width: 140px; user-select: none; }
+    .timer-label { font-size: 0.9rem; color: #6e84a3; margin-bottom: 5px; }
+    .timer { font-weight: 800; font-size: 1.5rem; color: #f44336; text-align: center; letter-spacing: 1px; }
+    .timer-warning { font-size: 0.8rem; color: #f44336; margin-top: 5px; font-weight: 600; display:none; }
+
+    /* Bids Header */
+    .bids-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 12px; }
+    .bids-title { font-size: 1.3rem; font-weight: 700; color: #2c7be5; }
+    .bids-meta { color:#6e84a3; font-size:0.95rem; }
+    .sort-options { display: flex; gap: 10px; align-items: center; }
+    .sort-label { font-size: 0.9rem; color: #6e84a3; }
+    .sort-select { padding: 6px 10px; border-radius: 6px; border: 1px solid #ddd; background: white; font-size: 0.9rem; cursor: pointer; }
+
+    /* Bids Section */
+    .bids-wrapper { border: 1px solid #eaeef2; border-radius: 10px; background: #fafbfd; overflow: hidden; }
+    .bids-section { max-height: 440px; overflow-y: auto; scroll-behavior: smooth; }
+    .bids-section::-webkit-scrollbar { width: 8px; }
+    .bids-section::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .bids-section::-webkit-scrollbar-thumb { background: #c5cbd7; border-radius: 10px; }
+    .bids-section::-webkit-scrollbar-thumb:hover { background: #a8b1c2; }
+
+    /* Grid columns: Top | Bidder | Deposit | Bid | Timestamp | Action */
+    .grid { display: grid; grid-template-columns: 64px 1.5fr 1fr 1fr 1.2fr 1fr; align-items: center; gap: 14px; }
+
+    .bids-head { position: sticky; top: 0; z-index: 1; background: #f0f4fb; border-bottom: 1px solid #e1e7f0; padding: 10px 14px; font-weight: 700; color: #526581; }
+    .bid-row { padding: 12px 14px; border-bottom: 1px solid #eee; background: #fff; }
+    .bid-row:hover { background: #f7faff; }
+    .bid-row.highlight { background: linear-gradient(135deg, #d6e5fd 0%, #e4ecff 100%); border-left: 4px solid #2c7be5; }
+    .top-flag { text-align:center; }
+    .top-flag i { color:#f4b400; font-size: 1.1rem; }
+
+    .bidder-name { font-size: 1.05rem; color: #2c7be5; font-weight: 600; }
+    .bidder-sub { font-size: 0.85rem; color: #6e84a3; }
+    .deposit-amount { font-weight: 600; color: #444; }
+    .bid-amount { font-weight: 800; color: #0f9d58; }
+    .bid-timestamp { font-size: 0.92rem; color: #6e84a3; }
+
+    .profile-button { background-color: #2c7be5; border: none; color: white; padding: 8px 14px; font-size: 0.9rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px; }
+    .profile-button:hover { background-color: #1a68d1; transform: translateY(-1px); }
+
+    /* See More */
+    .see-more-btn { background: transparent; border: 2px solid #2c7be5; color: #2c7be5; padding: 10px 18px; font-weight: 600; border-radius: 8px; cursor: pointer; margin: 16px auto; display: flex; align-items: center; gap: 8px; }
+    .see-more-btn:hover { background: #e4ecff; }
+    .see-more-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Modal */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; padding:20px; z-index:1000; }
+    .modal { width: 100%; max-width: 520px; background:#fff; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.2); overflow:hidden; }
+    .modal-header { padding:16px 20px; background:#2c7be5; color:#fff; display:flex; justify-content:space-between; align-items:center; }
+    .modal-body { padding:18px 20px; display:grid; gap:10px; }
+    .close-btn { background:transparent; border:none; color:#fff; font-size:1.2rem; cursor:pointer; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #0f9d58; color: white; padding: 12px 18px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; transform: translateY(120%); opacity: 0; transition: all 0.4s ease; z-index: 1100; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* Bidding Over Overlay */
+    .bidding-over-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.98);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 100;
+      flex-direction: column;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      animation: fadeIn 0.5s ease;
+    }
+    .bidding-over-message {
+      max-width: 400px;
+      padding: 25px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .bidding-over-message h2 {
+      color: #b71c1c;
+      font-weight: 700;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .bidding-over-message p {
+      color: #555;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .noted-btn {
+      background: #2c7be5;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .noted-btn:hover {
+      background: #1a68d1;
+      transform: translateY(-2px);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 48px 1.6fr .9fr .9fr 1.1fr 1fr; }
+    }
+    @media (max-width: 720px) {
+      .property-summary { flex-direction: column; align-items: flex-start; gap: 15px; }
+      .property-summary img { width: 100%; height: 180px; }
+      .grid { grid-template-columns: 1fr; }
+      .bids-head { display:none; }
+      .bid-row { display:grid; grid-template-columns: 1fr 1fr; gap:8px 12px; }
+      .top-flag { grid-column: 1 / -1; text-align:left; }
+      .bidder-col { grid-column: 1 / -1; }
+      .action-col { grid-column: 1 / -1; }
+      .see-more-btn { width: 100%; justify-content: center; }
+      .bidding-over-message {
+        width: 90%;
+        padding: 20px;
+      }
+    }
+
+    /* Tiny pulse for the timer when < 5min */
+    @keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.05)} 100%{transform:scale(1)} }
+    .pulse { animation: pulse 1s infinite; }
+  </style>
+</head>
+<body>
+<div class="container" role="main" aria-label="Seller bidding dashboard for property">
+  <div class="ribbon" id="ribbon">LIVE BIDDING</div>
+
+  <!-- Property Details & Timer -->
+  <div class="property-summary" aria-label="Property details and auction timer">
+    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=900&q=80" alt="Luxury Apartment Thumbnail" />
+    <div class="property-info">
+      <div class="property-name">Luxury 3BHK Apartment</div>
+      <div class="property-location"><i class="fas fa-map-marker-alt"></i> 123 Main St, Bengaluru, Karnataka</div>
+      <div class="property-features">
+        <span class="property-status" aria-label="Property status">For Sale</span>
+        <span class="feature-tag"><i class="fas fa-bed"></i> 3 Beds</span>
+        <span class="feature-tag"><i class="fas fa-bath"></i> 2 Baths</span>
+        <span class="feature-tag"><i class="fas fa-ruler-combined"></i> 1200 sq.ft.</span>
+      </div>
+    </div>
+    <div class="timer-container">
+      <div class="timer-label">Time Remaining</div>
+      <div class="timer" role="timer" aria-live="polite" aria-atomic="true" aria-label="Time remaining for bidding" id="timerElement">00:00:10</div>
+      <div class="timer-warning" id="timerWarning">Bidding ends soon!</div>
+    </div>
+  </div>
+
+  <!-- Bids Header with Sort and Highest Bid Meta -->
+  <div class="bids-header">
+    <div>
+      <div class="bids-title">Current Bids <span id="bidCount">(0)</span></div>
+      <div class="bids-meta">Highest Bid: <strong id="highestBidMeta">—</strong></div>
+    </div>
+    <div class="sort-options">
+      <span class="sort-label">Sort by:</span>
+      <select class="sort-select" id="sortSelect" aria-label="Sort bids">
+        <option value="amount-desc">Highest Amount First</option>
+        <option value="amount-asc">Lowest Amount First</option>
+        <option value="date-desc">Newest First</option>
+        <option value="date-asc">Oldest First</option>
+        <option value="deposit-desc">Highest Deposit</option>
+        <option value="deposit-asc">Lowest Deposit</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Bids Table -->
+  <div class="bids-wrapper">
+    <div class="bids-section" id="bidsSection" aria-label="List of bids" tabindex="0">
+      <div class="bids-head grid" role="row" aria-label="Bids table header">
+        <div class="top-flag">Top</div>
+        <div>Bidder</div>
+        <div>Deposited Amount</div>
+        <div>Bid Amount</div>
+        <div>Timestamp</div>
+        <div>Actions</div>
+      </div>
+      <!-- Rows injected here -->
+    </div>
+  </div>
+
+  <button class="see-more-btn" id="seeMoreBtn" aria-label="Load more bids"><i class="fas fa-chevron-down"></i> Show More Bids</button>
+  
+  <!-- Bidding Over Overlay -->
+  <div class="bidding-over-overlay" id="biddingOverOverlay">
+    <div class="bidding-over-message">
+      <h2><i class="fas fa-gavel"></i> Bidding Closed</h2>
+      <p>The bidding for this property has ended. You can review all submitted bids below.</p>
+      <button class="noted-btn" id="notedBtn"><i class="fas fa-check"></i> Noted</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-backdrop" id="profileModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+    <div class="modal-header">
+      <h3 id="profileTitle" style="margin:0;font-size:1.1rem;">Bidder Profile</h3>
+      <button class="close-btn" id="closeModal" aria-label="Close profile"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="profileBody"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastMessage">Done</span></div>
+
+<script>
+  // --------- Sample data (seller view) ---------
+  let bids = [
+    { bidderId: 1, bidderName: "Alice Kumar", deposit: 200000, amount: 7250000, timestamp: "2025-08-22T10:30:00", email:"alice@example.com", profile:"#" },
+    { bidderId: 2, bidderName: "Bob Singh", deposit: 150000, amount: 7100000, timestamp: "2025-08-22T09:45:00", email:"bob@example.com", profile:"#" },
+    { bidderId: 3, bidderName: "Charlie Rao", deposit: 150000, amount: 7000000, timestamp: "2025-08-21T15:20:00", email:"charlie@example.com", profile:"#" },
+    { bidderId: 4, bidderName: "David Mehta", deposit: 100000, amount: 6950000, timestamp: "2025-08-20T14:10:00", email:"david@example.com", profile:"#" },
+    { bidderId: 5, bidderName: "Eva Sharma", deposit: 100000, amount: 6900000, timestamp: "2025-08-19T17:55:00", email:"eva@example.com", profile:"#" },
+    { bidderId: 6, bidderName: "Farhan Tigadi", deposit: 100000, amount: 6800000, timestamp: "2025-08-18T12:00:00", email:"farhan@example.com", profile:"#" },
+    { bidderId: 7, bidderName: "Grace Pinto", deposit: 90000, amount: 6700000, timestamp: "2025-08-17T11:05:00", email:"grace@example.com", profile:"#" },
+    { bidderId: 8, bidderName: "Hassan Ali", deposit: 90000, amount: 6600000, timestamp: "2025-08-16T16:40:00", email:"hassan@example.com", profile:"#" },
+    { bidderId: 9, bidderName: "Isha Patel", deposit: 80000, amount: 6500000, timestamp: "2025-08-15T10:12:00", email:"isha@example.com", profile:"#" }
+  ];
+
+  const bidsSection = document.getElementById("bidsSection");
+  const seeMoreBtn = document.getElementById("seeMoreBtn");
+  const sortSelect = document.getElementById("sortSelect");
+  const bidCount = document.getElementById("bidCount");
+  const highestBidMeta = document.getElementById("highestBidMeta");
+  const toast = document.getElementById("toast");
+  const toastMessage = document.getElementById("toastMessage");
+  const timerElement = document.getElementById("timerElement");
+  const timerWarning = document.getElementById("timerWarning");
+  const ribbon = document.getElementById("ribbon");
+  const biddingOverOverlay = document.getElementById("biddingOverOverlay");
+  const notedBtn = document.getElementById("notedBtn");
+
+  // Timer - set to 10 seconds for testing
+  let countdownSeconds = 10;
+  let biddingEnded = false;
+
+  let visibleCount = 3;
+  let currentSort = "amount-desc";
+
+  function showToast(message){
+    toastMessage.textContent = message;
+    toast.classList.add("show");
+    setTimeout(()=> toast.classList.remove("show"), 2500);
+  }
+
+  // Formatters
+  function formatCurrency(num) {
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
+  }
+  function formatTimestamp(ts) {
+    const d = new Date(ts);
+    return d.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+  }
+
+  function updateMeta(){
+    const highest = Math.max(...bids.map(b=>b.amount));
+    highestBidMeta.textContent = formatCurrency(highest);
+    bidCount.textContent = `(${bids.length})`;
+  }
+
+  function sortBids(){
+    switch(currentSort){
+      case 'amount-desc': bids.sort((a,b)=> b.amount - a.amount); break;
+      case 'amount-asc':  bids.sort((a,b)=> a.amount - b.amount); break;
+      case 'date-desc':   bids.sort((a,b)=> new Date(b.timestamp) - new Date(a.timestamp)); break;
+      case 'date-asc':    bids.sort((a,b)=> new Date(a.timestamp) - new Date(b.timestamp)); break;
+      case 'deposit-desc': bids.sort((a,b)=> b.deposit - a.deposit); break;
+      case 'deposit-asc':  bids.sort((a,b)=> a.deposit - b.deposit); break;
+    }
+    renderBids();
+  }
+
+  function renderBids(){
+    const highest = Math.max(...bids.map(b=>b.amount));
+    // Remove existing rows (keep header)
+    [...bidsSection.querySelectorAll('.bid-row')].forEach(n=>n.remove());
+
+    const toRender = bids.slice(0, Math.min(visibleCount, bids.length));
+    toRender.forEach((bid, i)=>{
+      const row = document.createElement('div');
+      row.className = `bid-row grid${bid.amount === highest ? ' highlight' : ''}`;
+      row.setAttribute('role','row');
+      const isTop = bid.amount === highest;
+
+      row.innerHTML = `
+        <div class="top-flag" title="${isTop ? 'Highest bid' : ''}">${isTop ? '<i class="fas fa-trophy" aria-label="Highest"></i>' : ''}</div>
+        <div class="bidder-col">
+          <div class="bidder-name">${bid.bidderName}</div>
+          <div class="bidder-sub"><i class="fas fa-envelope"></i> ${bid.email}</div>
+        </div>
+        <div class="deposit-amount">${formatCurrency(bid.deposit)}</div>
+        <div class="bid-amount">${formatCurrency(bid.amount)}</div>
+        <time class="bid-timestamp" datetime="${bid.timestamp}">${formatTimestamp(bid.timestamp)}</time>
+        <div class="action-col"><button class="profile-button" onclick='viewProfile(${JSON.stringify(bid)})'><i class="fas fa-user"></i> View Profile</button></div>
+      `;
+      bidsSection.appendChild(row);
+    });
+
+    // See more visibility
+    seeMoreBtn.style.display = (visibleCount >= bids.length) ? 'none' : 'flex';
+  }
+
+  function viewProfile(bid){
+    const modal = document.getElementById('profileModal');
+    const body = document.getElementById('profileBody');
+    body.innerHTML = `
+      <div><strong>Name:</strong> ${bid.bidderName}</div>
+      <div><strong>Email:</strong> ${bid.email}</div>
+      <div><strong>Deposited Amount:</strong> ${formatCurrency(bid.deposit)}</div>
+      <div><strong>Latest Bid:</strong> ${formatCurrency(bid.amount)}</div>
+      <div><strong>Bid Time:</strong> ${formatTimestamp(bid.timestamp)}</div>
+      <div style="margin-top:10px;">
+        <a href="${bid.profile}" target="_blank" class="profile-button" style="text-decoration:none;">
+          <i class="fas fa-external-link-alt"></i> Open Full Profile
+        </a>
+      </div>
+    `;
+    modal.style.display = 'flex';
+  }
+
+  function closeProfile(){
+    document.getElementById('profileModal').style.display = 'none';
+  }
+
+  function endBidding() {
+    biddingEnded = true;
+    timerElement.textContent = 'Bidding Closed';
+    timerWarning.textContent = 'Auction has ended';
+    timerElement.classList.remove('pulse');
+    timerWarning.style.display = 'none';
+    seeMoreBtn.disabled = true;
+    sortSelect.disabled = true;
+    ribbon.textContent = 'BIDDING ENDED';
+    ribbon.classList.add('ended');
+    biddingOverOverlay.style.display = 'flex';
+    clearInterval(timerInterval);
+  }
+
+  // Timer countdown
+  function updateTimer(){
+    if (biddingEnded) return;
+    
+    if (countdownSeconds > 0) {
+      const hrs = String(Math.floor(countdownSeconds / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((countdownSeconds % 3600) / 60)).padStart(2, '0');
+      const secs = String(countdownSeconds % 60).padStart(2, '0');
+      timerElement.textContent = `${hrs}:${mins}:${secs}`;
+      
+      if (countdownSeconds < 300) { 
+        timerElement.classList.add('pulse'); 
+        timerWarning.style.display = 'block'; 
+      }
+      
+      countdownSeconds--;
+    } else {
+      endBidding();
+    }
+  }
+
+  // Event bindings
+  seeMoreBtn.addEventListener('click', ()=>{ 
+    visibleCount += 3; 
+    renderBids(); 
+    showToast('Loaded more bids'); 
+  });
+  
+  sortSelect.addEventListener('change', ()=>{ 
+    currentSort = sortSelect.value; 
+    sortBids(); 
+    showToast('Sorted'); 
+    bidsSection.scrollTop = 0; 
+  });
+
+  notedBtn.addEventListener('click', () => {
+    biddingOverOverlay.style.display = 'none';
+    showToast('Bidding closed acknowledged');
+  });
+
+  document.getElementById('closeModal').addEventListener('click', closeProfile);
+  document.getElementById('profileModal').addEventListener('click', (e)=>{ 
+    if(e.target.id==='profileModal') closeProfile(); 
+  });
+
+  const timerInterval = setInterval(updateTimer, 1000);
+
+  // Init
+  updateMeta();
+  sortBids();
+  updateTimer();
+</script>
+
+
+                <!-- Bidder Profile Modal -->
+                <div class="modal hidden" id="bidder-modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Bidder Profile</h3>
+                            <button class="modal-close" id="close-bidder-modal">×</button>
+                        </div>
+                        <div class="modal-body" id="bidder-details">
+                            <!-- Bidder details will be injected here -->
+                        </div>
+                    </div>
+                </div>
+                <!-- Bidding Closed Overlay -->
+<div class="overlay hidden" id="bidding-closed-overlay">
+  <div class="overlay-content">
+    <h2>Bidding Closed</h2>
+    <p>This auction has ended.</p>
+    <button class="btn btn--primary" onclick="closeBiddingOverlay()">Close</button>
+  </div>
+</div>
+ 
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
