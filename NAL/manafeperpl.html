@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NAL - Manage Properties</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    /* Base */
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      color: #0d141c;
+      background: #f8fafc;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* Navbar */
+    .navbar {
+      height: 64px;
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1.25rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: #2563eb;
+      display: inline-block;
+    }
+    .brand {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .brand small {
+      font-size: 0.7rem;
+      color: #64748b;
+      margin-left: 0.25rem;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .icon-btn {
+      background: none;
+      border: none;
+      position: relative;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+    }
+    .icon {
+      width: 20px;
+      height: 20px;
+      color: #475569;
+      display: block;
+    }
+    .dot {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+    }
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background: #dbeafe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      color: #2563eb;
+    }
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+    .name {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .email {
+      font-size: 0.7rem;
+      color: #64748b;
+    }
+    .logout {
+      padding: 0.35rem 0.8rem;
+      font-size: 0.8rem;
+      background: #f1f5f9;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .logout:hover {
+      background: #e2e8f0;
+    }
+
+    /* Hamburger */
+    .hamburger {
+      background: none;
+      border: none;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      padding: 0;
+    }
+    .hamburger span {
+      width: 22px;
+      height: 2px;
+      background: #0d141c;
+      border-radius: 2px;
+      display: block;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: #fff;
+      border-right: 1px solid #e2e8f0;
+      padding: 1rem;
+      position: fixed;
+      top: 64px;
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+      z-index: 55;
+    }
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border-radius: 8px;
+      color: #0d141c;
+      cursor: pointer;
+      user-select: none;
+    }
+    .menu-item:hover {
+      background: #f1f5f9;
+    }
+    .menu-item.active {
+      background: #e2e8f0;
+    }
+    .menu-item svg.icon {
+      width: 20px;
+      height: 20px;
+      fill: #475569;
+    }
+
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      z-index: 50;
+    }
+    .overlay.show {
+      display: block;
+    }
+
+    /* Main */
+    .main-content {
+      margin-left: 380px;
+      padding: 1.5rem;
+      transition: margin-left 0.3s ease;
+      margin-right: 80px;
+    }
+    .main-header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0;
+      color: #0d141c;
+    }
+    .empty-state {
+      margin-top: 2rem;
+      border: 2px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 3rem 1rem;
+      text-align: center;
+      background: #fff;
+    }
+    .empty-state h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #0d141c;
+    }
+    .empty-state p {
+      font-size: 0.9rem;
+      color: #475569;
+      margin-bottom: 1.5rem;
+    }
+    .add-btn {
+      padding: 0.6rem 1.2rem;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .add-btn:hover {
+      background: #1e40af;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        z-index: 60;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+      }
+      .hamburger {
+        display: flex;
+      }
+      .email {
+        display: none;
+      }
+    }
+    @media (max-width: 480px) {
+      .brand small {
+        display: none;
+      }
+      .nav-right {
+        gap: 0.5rem;
+      }
+      .name {
+        font-size: 0.75rem;
+      }
+      .logout {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <button id="menu-btn" class="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="logo" aria-label="NAL logo"></div>
+      <span class="brand">NAL <small>India</small></span>
+    </div>
+
+    <div class="nav-right">
+      <button class="icon-btn notification" aria-label="Notifications">
+        <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M15 17h5l-1.405-1.405A2.032 
+            2.032 0 0118 14.158V11a6.002 
+            6.002 0 00-5-5.917V4a2 2 0 
+            10-4 0v1.083A6.002 6.002 
+            0 004 11v3.159c0 .538-.214 
+            1.055-.595 1.436L2 17h5m3 
+            0v1a3 3 0 006 0v-1m-6 
+            0h6"></path>
+        </svg>
+        <span class="dot"></span>
+      </button>
+
+      <div class="profile">
+        <div class="avatar" aria-label="User avatar">
+          <svg class="icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" focusable="false">
+            <path d="M10 10a4 4 0 100-8 4 4 0 
+              000 8zM2 16a8 8 0 0116 0v1H2v-1z"></path>
+          </svg>
+        </div>
+        <div class="profile-info">
+          <span class="name">farhantigadi123</span>
+          <span class="email">farhantigadi123@gmail.com</span>
+        </div>
+      </div>
+
+      <button class="logout" aria-label="Logout">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Sidebar (Desktop + Mobile drawer) -->
+  <aside id="sidebar" class="sidebar" role="navigation" aria-label="Main sidebar">
+    <div class="menu">
+      <a href="#" class="menu-item" tabindex="0">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" aria-hidden="true" focusable="false">
+          <path d="M218.83,103.77l-80-75.48...Z"/>
+        </svg>
+        Dashboard
+      </a>
+      <a href="#" class="menu-item active" tabindex="0">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" aria-hidden="true" focusable="false">
+          <path d="M239.73,208H224V96...Z"/>
+        </svg>
+        Manage Properties
+      </a>
+      <a href="#" class="menu-item" tabindex="0">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" aria-hidden="true" focusable="false">
+          <path d="M221.8,175.94C216.25...Z"/>
+        </svg>
+        Notifications
+      </a>
+    </div>
+  </aside>
+
+  <!-- Overlay (mobile only) -->
+  <div id="overlay" class="overlay"></div>
+
+  <!-- Main Content -->
+  <main class="main-content" role="main">
+    <header class="main-header">
+      <h1>Manage Properties</h1>
+    </header>
+
+    <section class="empty-state" aria-live="polite">
+      <h2>No properties listed yet.</h2>
+      <p>Start by adding your first property.</p>
+      <button class="add-btn" type="button">+ Add Property</button>
+    </section>
+  </main>
+
+  <!-- Script -->
+  <script>
+    const menuBtn = document.getElementById("menu-btn");
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+
+    menuBtn.addEventListener("click", () => {
+      const isOpen = sidebar.classList.toggle("open");
+      overlay.classList.toggle("show", isOpen);
+      menuBtn.setAttribute("aria-expanded", isOpen);
+    });
+
+    overlay.addEventListener("click", () => {
+      sidebar.classList.remove("open");
+      overlay.classList.remove("show");
+      menuBtn.setAttribute("aria-expanded", false);
+    });
+  </script>
+</body>
+</html>
+

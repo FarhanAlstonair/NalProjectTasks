@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NAL - Manage Properties</title>
+  <link rel="stylesheet" href="manageprorp.css" />
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <button id="menu-btn" class="hamburger">
+        <span></span><span></span><span></span>
+      </button>
+      <img src="YOUR_LOGO_URL_HERE" alt="NAL logo" class="logo" />
+      <span class="brand">NAL <small>India</small></span>
+    </div>
+
+    <div class="nav-right">
+      <button class="icon-btn notification">
+        <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M15 17h5l-1.405-1.405A2.032 
+            2.032 0 0118 14.158V11a6.002 
+            6.002 0 00-5-5.917V4a2 2 0 
+            10-4 0v1.083A6.002 6.002 
+            0 004 11v3.159c0 .538-.214 
+            1.055-.595 1.436L2 17h5m3 
+            0v1a3 3 0 006 0v-1m-6 
+            0h6"></path>
+        </svg>
+        <span class="dot"></span>
+      </button>
+
+      <div class="profile">
+        <div class="avatar">
+          <svg class="icon" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 10a4 4 0 100-8 4 4 0 
+              000 8zM2 16a8 8 0 0116 0v1H2v-1z"></path>
+          </svg>
+        </div>
+        <div class="profile-info">
+          <span class="name">farhantigadi123</span>
+          <span class="email">farhantigadi123@gmail.com</span>
+        </div>
+      </div>
+
+      <button class="logout">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Sidebar (Desktop only + Mobile drawer) -->
+  <aside id="sidebar" class="sidebar">
+    <div class="menu">
+      <a href="#" class="menu-item">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path d="M218.83,103.77l-80-75.48...Z"/></svg>
+        Dashboard
+      </a>
+      <a href="#" class="menu-item active">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path d="M239.73,208H224V96...Z"/></svg>
+        Manage Properties
+      </a>
+      <a href="#" class="menu-item">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path d="M221.8,175.94C216.25...Z"/></svg>
+        Notifications
+      </a>
+    </div>
+  </aside>
+
+  <!-- Overlay (mobile only) -->
+  <div id="overlay" class="overlay"></div>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="main-header">
+      <h1>Manage Properties</h1>
+    </header>
+
+    <section class="empty-state">
+      <h2>No properties listed yet.</h2>
+      <p>Start by adding your first property.</p>
+      <button class="add-btn"> Add Property</button>
+    </section>
+  </main>
+
+  <!-- Script -->
+  <script>
+    const menuBtn = document.getElementById("menu-btn");
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+
+    menuBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+      overlay.classList.toggle("show");
+    });
+
+    overlay.addEventListener("click", () => {
+      sidebar.classList.remove("open");
+      overlay.classList.remove("show");
+    });
+  </script>
+</body>
+</html>
