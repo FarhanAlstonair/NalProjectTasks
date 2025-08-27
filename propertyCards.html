@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAL India - Property Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background: #fff;
+            border-right: 1px solid #e1e5eb;
+            padding: 20px 0;
+            height: 100vh;
+            position: fixed;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #e1e5eb;
+            margin-bottom: 20px;
+        }
+        
+        .logo img {
+            width: 36px;
+            height: 36px;
+            margin-right: 10px;
+            background: #2c7be5;
+            border-radius: 8px;
+        }
+        
+        .logo-text {
+            font-weight: 700;
+            font-size: 20px;
+            color: #2c7be5;
+        }
+        
+        .logo-text span {
+            font-size: 12px;
+            color: #6e84a3;
+            font-weight: 500;
+            margin-left: 4px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #6e84a3;
+            font-weight: 500;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background: #edf2f9;
+            color: #2c7be5;
+        }
+        
+        .menu-item.active {
+            background: #edf2f9;
+            color: #2c7be5;
+            border-left: 3px solid #2c7be5;
+        }
+        
+        .menu-item i {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e1e5eb;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c7be5;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: #2c7be5;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1a68d1;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d8e2ef;
+            color: #6e84a3;
+        }
+        
+        .btn-outline:hover {
+            background: #edf2f9;
+        }
+        
+        /* Hamburger Menu */
+        .hamburger-menu {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 21px;
+            cursor: pointer;
+        }
+        
+        .hamburger-menu span {
+            height: 3px;
+            width: 100%;
+            background-color: #2c7be5;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #f5f7f9;
+            border-radius: 6px;
+            padding: 8px 12px;
+            width: 300px;
+        }
+        
+        .search-box input {
+            border: none;
+            background: transparent;
+            padding: 6px;
+            width: 100%;
+            outline: none;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #d8e2ef;
+            background: white;
+            color: #6e84a3;
+            cursor: pointer;
+        }
+        
+        /* Property Cards */
+        .property-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .property-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .property-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .property-image {
+            width: 240px;
+            flex-shrink: 0;
+            position: relative;
+        }
+        
+        .property-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .property-status {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #2c7be5;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .property-content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .property-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .property-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c7be5;
+        }
+        
+        .property-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f7f9;
+            color: #6e84a3;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            background: #edf2f9;
+            color: #2c7be5;
+        }
+        
+        .property-address {
+            color: #6e84a3;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        
+        .property-details {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #6e84a3;
+        }
+        
+        .property-features {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .feature-tag {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .tag-sale {
+            background: #d6e5fd;
+            color: #2c7be5;
+        }
+        
+        .tag-rent {
+            background: #d5f0e6;
+            color: #0f9d58;
+        }
+        
+        .tag-urgent {
+            background: #ffebe6;
+            color: #f44336;
+        }
+        
+        .tag-bidding {
+            background: #fef7cd;
+            color: #f4b400;
+        }
+        
+        .tag-active {
+            background: #d5f0e6;
+            color: #0f9d58;
+        }
+        
+        .tag-pending {
+            background: #fef7cd;
+            color: #f4b400;
+        }
+        
+        .property-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+        
+        .property-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c7be5;
+        }
+        
+        .property-date {
+            color: #6e84a3;
+            font-size: 14px;
+        }
+        
+        /* Overlay for mobile when sidebar is open */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 220px;
+            }
+            
+            .main-content {
+                margin-left: 220px;
+            }
+            
+            .property-image {
+                width: 200px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hamburger-menu {
+                display: flex;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .overlay.active {
+                display: block;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            
+            .property-card {
+                flex-direction: column;
+            }
+            
+            .property-image {
+                width: 100%;
+                height: 200px;
+            }
+            
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .filters {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 8px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .property-details {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .property-features {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="logo">
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xOSAxMGgtMXY5SDZ2LTlINVY1aDE0djV6bS04IDdoNHYtNWgtNHY1em05LTExSDR2MTNoMVY2aDE0djRoMXYtNHYtMnoiLz48L3N2Zz4=" alt="NAL Logo">
+                <div class="logo-text">NAL <span>India</span></div>
+            </div>
+            
+            <div class="menu-item active">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </div>
+            
+            <div class="menu-item">
+                <i class="fas fa-building"></i>
+                <span>Manage Properties</span>
+            </div>
+            
+            <div class="menu-item">
+                <i class="fas fa-bell"></i>
+                <span>Notifications</span>
+            </div>
+            
+            <div class="menu-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Reports</span>
+            </div>
+            
+            <div class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+            
+            <div class="menu-item">
+                <i class="fas fa-question-circle"></i>
+                <span>Help & Support</span>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="hamburger-menu" id="hamburger-menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <h1 class="page-title">Manage Properties</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Property
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search properties...">
+                </div>
+                
+                <div class="filters">
+                    <select class="filter-select">
+                        <option>All Statuses</option>
+                        <option>Active</option>
+                        <option>Pending</option>
+                        <option>Sold</option>
+                    </select>
+                    
+                    <select class="filter-select">
+                        <option>All Types</option>
+                        <option>For Sale</option>
+                        <option>For Rent</option>
+                        <option>Urgent Sale</option>
+                    </select>
+                    
+                    <select class="filter-select">
+                        <option>Newest First</option>
+                        <option>Price: Low to High</option>
+                        <option>Price: High to Low</option>
+                        <option>Oldest First</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Property Cards -->
+            <div class="property-cards">
+                <!-- Property Card 1 -->
+                <div class="property-card">
+                    <div class="property-image">
+                        <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80" alt="Luxury Apartment">
+                        <div class="property-status">For Sale</div>
+                    </div>
+                    
+                    <div class="property-content">
+                        <div class="property-header">
+                            <h2 class="property-title">Luxury 3BHK Apartment</h2>
+                            <div class="property-actions">
+                                <div class="action-btn"><i class="fas fa-edit"></i></div>
+                                <div class="action-btn"><i class="fas fa-ellipsis-v"></i></div>
+                            </div>
+                        </div>
+                        
+                        <p class="property-address">123 Main St, Bengaluru, Karnataka</p>
+                        
+                        <div class="property-details">
+                            <span><i class="fas fa-bed"></i> 3 Beds</span>
+                            <span><i class="fas fa-bath"></i> 2 Baths</span>
+                            <span><i class="fas fa-ruler-combined"></i> 1200 sq.ft.</span>
+                        </div>
+                        
+                        <div class="property-features">
+                            <div class="feature-tag tag-sale">Sale</div>
+                            <div class="feature-tag tag-active">Active</div>
+                            <div class="feature-tag tag-bidding"><i class="fas fa-gavel"></i> Bidding</div>
+                        </div>
+                        
+                        <div class="property-footer">
+                            <div class="property-price">₹72,50,000</div>
+                            <div class="property-date">Added: 24 Oct 2023</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Property Card 2 -->
+                <div class="property-card">
+                    <div class="property-image">
+                        <img src="https://images.unsplash.com/photo-1574362848149-11496d93a7c7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80" alt="Modern Villa">
+                        <div class="property-status">Urgent Sale</div>
+                    </div>
+                    
+                    <div class="property-content">
+                        <div class="property-header">
+                            <h2 class="property-title">Modern 4BHK Villa</h2>
+                            <div class="property-actions">
+                                <div class="action-btn"><i class="fas fa-edit"></i></div>
+                                <div class="action-btn"><i class="fas fa-ellipsis-v"></i></div>
+                            </div>
+                        </div>
+                        
+                        <p class="property-address">456 Oak Avenue, Mumbai, Maharashtra</p>
+                        
+                        <div class="property-details">
+                            <span><i class="fas fa-bed"></i> 4 Beds</span>
+                            <span><i class="fas fa-bath"></i> 3 Baths</span>
+                            <span><i class="fas fa-ruler-combined"></i> 2400 sq.ft.</span>
+                        </div>
+                        
+                        <div class="property-features">
+                            <div class="feature-tag tag-sale">Sale</div>
+                            <div class="feature-tag tag-active">Active</div>
+                            <div class="feature-tag tag-urgent"><i class="fas fa-bolt"></i> Urgent Sale</div>
+                            <div class="feature-tag tag-bidding"><i class="fas fa-gavel"></i> Bidding</div>
+                        </div>
+                        
+                        <div class="property-footer">
+                            <div class="property-price">₹1,20,00,000</div>
+                            <div class="property-date">Added: 22 Oct 2023</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Property Card 3 -->
+                <div class="property-card">
+                    <div class="property-image">
+                        <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80" alt="Luxury Home">
+                        <div class="property-status">For Rent</div>
+                    </div>
+                    
+                    <div class="property-content">
+                        <div class="property-header">
+                            <h2 class="property-title">Luxury Family Home</h2>
+                            <div class="property-actions">
+                                <div class="action-btn"><i class="fas fa-edit"></i></div>
+                                <div class="action-btn"><i class="fas fa-ellipsis-v"></i></div>
+                            </div>
+                        </div>
+                        
+                        <p class="property-address">789 Palm Boulevard, Hyderabad, Telangana</p>
+                        
+                        <div class="property-details">
+                            <span><i class="fas fa-bed"></i> 5 Beds</span>
+                            <span><i class="fas fa-bath"></i> 4 Baths</span>
+                            <span><i class="fas fa-ruler-combined"></i> 3200 sq.ft.</span>
+                        </div>
+                        
+                        <div class="property-features">
+                            <div class="feature-tag tag-rent">Rent</div>
+                            <div class="feature-tag tag-active">Active</div>
+                        </div>
+                        
+                        <div class="property-footer">
+                            <div class="property-price">₹85,000/month</div>
+                            <div class="property-date">Added: 20 Oct 2023</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar on hamburger menu click
+        const hamburgerMenu = document.getElementById('hamburger-menu');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        
+        hamburgerMenu.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+        
+        // Close sidebar when clicking on overlay
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+        
+        // Simple JavaScript for interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add property button action
+            document.querySelector('.btn-primary').addEventListener('click', function() {
+                alert('Add Property functionality would open here');
+            });
+            
+            // Action buttons
+            const actionButtons = document.querySelectorAll('.action-btn');
+            actionButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const icon = this.querySelector('i').className;
+                    if (icon.includes('edit')) {
+                        alert('Edit property');
+                    } else if (icon.includes('ellipsis-v')) {
+                        alert('More options menu would open here');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

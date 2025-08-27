@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Property Bidding - NAL India</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  /* Reset & base */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7f9 0%, #e4e8ed 100%);
+    color: #333;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  a {
+    color: #2c7be5;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  /* Container */
+  .container {
+    max-width: 1000px;
+    margin: 1.5rem auto 3rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    padding: 25px 35px 35px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Header ribbon */
+  .ribbon {
+    position: absolute;
+    top: 20px;
+    right: -35px;
+    transform: rotate(45deg);
+    background: #2c7be5;
+    color: white;
+    padding: 8px 40px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  /* Property Details */
+  .property-summary {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+    border-bottom: 1px solid #eaeef2;
+    padding-bottom: 25px;
+    margin-bottom: 25px;
+    position: relative;
+  }
+  .property-summary img {
+    width: 150px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+  }
+  .property-summary img:hover {
+    transform: scale(1.03);
+  }
+  .property-info {
+    flex: 1;
+  }
+  .property-name {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #2c7be5;
+    margin-bottom: 8px;
+  }
+  .property-location {
+    font-size: 1.05rem;
+    color: #6e84a3;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .property-features {
+    font-size: 0.95rem;
+    color: #555;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .property-status {
+    display: inline-block;
+    background: #2c7be5;
+    color: white;
+    padding: 5px 12px;
+    font-size: 0.9rem;
+    border-radius: 16px;
+    font-weight: 600;
+  }
+  .feature-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f3f7ff;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+  }
+
+  /* Timer */
+  .timer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: auto;
+    min-width: 140px;
+    user-select: none;
+  }
+  .timer-label {
+    font-size: 0.9rem;
+    color: #6e84a3;
+    margin-bottom: 5px;
+  }
+  .timer {
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: #f44336;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+  .timer-warning {
+    font-size: 0.8rem;
+    color: #f44336;
+    margin-top: 5px;
+    font-weight: 600;
+  }
+
+  /* Bids Section */
+  .bids-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  .bids-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2c7be5;
+  }
+  .sort-options {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .sort-label {
+    font-size: 0.9rem;
+    color: #6e84a3;
+  }
+  .sort-select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .bids-section {
+    max-height: 420px;
+    overflow-y: auto;
+    border: 1px solid #eaeef2;
+    border-radius: 10px;
+    padding: 15px;
+    background: #fafbfd;
+    scroll-behavior: smooth;
+  }
+  .bids-section::-webkit-scrollbar {
+    width: 8px;
+  }
+  .bids-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  .bids-section::-webkit-scrollbar-thumb {
+    background: #c5cbd7;
+    border-radius: 10px;
+  }
+  .bids-section::-webkit-scrollbar-thumb:hover {
+    background: #a8b1c2;
+  }
+
+  /* Bid Row */
+  .bid-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 15px;
+    border-bottom: 1px solid #eee;
+    align-items: center;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    margin-bottom: 5px;
+  }
+  .bid-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+  .bid-row:hover {
+    background: #f0f5ff;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+  }
+  .bid-row.highlight {
+    background: linear-gradient(135deg, #d6e5fd 0%, #e4ecff 100%);
+    font-weight: 700;
+    border-left: 4px solid #2c7be5;
+  }
+  .bid-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .bidder-name {
+    font-size: 1.05rem;
+    color: #2c7be5;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .bidder-badge {
+    display: inline-block;
+    background: #0f9d58;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+    font-weight: 600;
+  }
+  .bid-time-ago {
+    font-size: 0.85rem;
+    color: #6e84a3;
+  }
+  .bid-amount {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f9d58;
+    min-width: 130px;
+    text-align: right;
+  }
+  .bid-timestamp {
+    font-size: 0.9rem;
+    color: #6e84a3;
+    min-width: 150px;
+    text-align: right;
+    margin-left: 15px;
+  }
+  .bid-contact {
+    margin-left: 20px;
+  }
+  .contact-button {
+    background-color: #2c7be5;
+    border: none;
+    color: white;
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .contact-button:hover {
+    background-color: #1a68d1;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  }
+
+  /* Bid Form */
+  .bid-form-container {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f8fafd;
+    border-radius: 10px;
+    border: 1px solid #eaeef2;
+  }
+  .bid-form-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #2c7be5;
+    margin-bottom: 15px;
+  }
+  .form-group {
+    margin-bottom: 15px;
+  }
+  .form-label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #444;
+  }
+  .form-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: #2c7be5;
+    box-shadow: 0 0 0 3px rgba(44, 123, 229, 0.1);
+  }
+  .bid-button {
+    background: linear-gradient(135deg, #2c7be5 0%, #1a68d1 100%);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+  }
+  .bid-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  .bid-button:disabled {
+    background: #a8b1c2;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* See More Button */
+  .see-more-btn {
+    background: transparent;
+    border: 2px solid #2c7be5;
+    color: #2c7be5;
+    padding: 10px 18px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 20px auto 0;
+    display: block;
+    width: max-content;
+    user-select: none;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .see-more-btn:hover {
+    background: #e4ecff;
+    transform: translateY(-2px);
+  }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #0f9d58;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.5s ease;
+    z-index: 1000;
+  }
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .container {
+      padding: 20px;
+    }
+    .property-summary {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+    .property-summary img {
+      width: 100%;
+      height: 180px;
+    }
+    .timer-container {
+      margin-left: 0;
+      align-items: flex-start;
+      min-width: auto;
+    }
+    .bids-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .bid-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 15px;
+    }
+    .bid-amount,
+    .bid-timestamp,
+    .bid-contact {
+      min-width: auto;
+      text-align: left;
+      margin-left: 0;
+    }
+    .bid-contact {
+      margin-top: 8px;
+      width: 100%;
+    }
+    .contact-button {
+      width: 100%;
+      justify-content: center;
+    }
+    .see-more-btn {
+      width: 100%;
+      text-align: center;
+      justify-content: center;
+    }
+  }
+
+  /* Animation */
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  .pulse {
+    animation: pulse 1s infinite;
+  }
+</style>
+</head>
+<body>
+
+<div class="container" role="main" aria-label="Bidding panel for property">
+  <div class="ribbon">LIVE BIDDING</div>
+
+  <!-- Property Details & Timer -->
+  <div class="property-summary" aria-label="Property details and auction timer">
+    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Luxury Apartment Thumbnail" />
+    <div class="property-info">
+      <div class="property-name">Luxury 3BHK Apartment</div>
+      <div class="property-location">
+        <i class="fas fa-map-marker-alt"></i>
+        123 Main St, Bengaluru, Karnataka
+      </div>
+      <div class="property-features">
+        <span class="property-status" aria-label="Property status">For Sale</span>
+        <span class="feature-tag"><i class="fas fa-bed"></i> 3 Beds</span>
+        <span class="feature-tag"><i class="fas fa-bath"></i> 2 Baths</span>
+        <span class="feature-tag"><i class="fas fa-ruler-combined"></i> 1200 sq.ft.</span>
+      </div>
+    </div>
+    <div class="timer-container">
+      <div class="timer-label">Time Remaining</div>
+      <div class="timer" role="timer" aria-live="polite" aria-atomic="true" aria-label="Time remaining for bidding">
+        00:30:00
+      </div>
+      <div class="timer-warning">Bidding ends soon!</div>
+    </div>
+  </div>
+
+  <!-- Bid list -->
+  <div class="bids-header">
+    <div class="bids-title">Current Bids <span id="bidCount">(9)</span></div>
+    <div class="sort-options">
+      <span class="sort-label">Sort by:</span>
+      <select class="sort-select" id="sortSelect" aria-label="Sort bids">
+        <option value="amount-desc">Highest First</option>
+        <option value="amount-asc">Lowest First</option>
+        <option value="date-desc">Newest First</option>
+        <option value="date-asc">Oldest First</option>
+      </select>
+    </div>
+  </div>
+  <div class="bids-section" id="bidsSection" aria-label="List of bids" tabindex="0">
+    <!-- Dynamically rendered bid rows here -->
+  </div>
+
+  <button class="see-more-btn" id="seeMoreBtn" aria-label="Load more bids">
+    <i class="fas fa-chevron-down"></i> Show More Bids
+  </button>
+
+  <!-- Bid Form -->
+  <div class="bid-form-container">
+    <div class="bid-form-title">Place Your Bid</div>
+    <div class="form-group">
+      <label class="form-label" for="bidAmount">Bid Amount (₹)</label>
+      <input type="number" id="bidAmount" class="form-input" placeholder="Enter your bid amount" min="6600000" step="50000">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="bidderName">Your Name</label>
+      <input type="text" id="bidderName" class="form-input" placeholder="Enter your full name">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="bidderEmail">Email Address</label>
+      <input type="email" id="bidderEmail" class="form-input" placeholder="Enter your email">
+    </div>
+    <button class="bid-button" id="submitBid">Submit Bid</button>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">
+  <i class="fas fa-check-circle"></i>
+  <span id="toastMessage">Your bid has been placed successfully!</span>
+</div>
+
+<script>
+  // Sample bids data (in real app, this would come from backend)
+  let bids = [
+    { bidderName: "Alice Kumar", amount: 7250000, timestamp: "2025-08-22T10:30:00", contact: "alice@example.com" },
+    { bidderName: "Bob Singh", amount: 7100000, timestamp: "2025-08-22T09:45:00", contact: "bob@example.com" },
+    { bidderName: "Charlie Rao", amount: 7000000, timestamp: "2025-08-21T15:20:00", contact: "charlie@example.com" },
+    { bidderName: "David Mehta", amount: 6950000, timestamp: "2025-08-20T14:10:00", contact: "david@example.com" },
+    { bidderName: "Eva Sharma", amount: 6900000, timestamp: "2025-08-19T17:55:00", contact: "eva@example.com" },
+    { bidderName: "Farhan Tigadi", amount: 6800000, timestamp: "2025-08-18T12:00:00", contact: "farhan@example.com" },
+    { bidderName: "Grace Pinto", amount: 6700000, timestamp: "2025-08-17T11:05:00", contact: "grace@example.com" },
+    { bidderName: "Hassan Ali", amount: 6600000, timestamp: "2025-08-16T16:40:00", contact: "hassan@example.com" },
+    { bidderName: "Isha Patel", amount: 6500000, timestamp: "2025-08-15T10:12:00", contact: "isha@example.com" },
+  ];
+
+  const bidsSection = document.getElementById("bidsSection");
+  const seeMoreBtn = document.getElementById("seeMoreBtn");
+  const sortSelect = document.getElementById("sortSelect");
+  const bidCount = document.getElementById("bidCount");
+  const bidAmountInput = document.getElementById("bidAmount");
+  const bidderNameInput = document.getElementById("bidderName");
+  const bidderEmailInput = document.getElementById("bidderEmail");
+  const submitBidButton = document.getElementById("submitBid");
+  const toast = document.getElementById("toast");
+  const toastMessage = document.getElementById("toastMessage");
+
+  let visibleCount = 3;
+  let currentSort = "amount-desc";
+
+  // Set minimum bid amount
+  bidAmountInput.min = Math.max(...bids.map(bid => bid.amount)) + 50000;
+
+  // Utility: Format number as currency INR
+  function formatCurrency(num) {
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
+  }
+
+  // Utility: Format date/time string
+  function formatTimestamp(ts) {
+    const d = new Date(ts);
+    return d.toLocaleString('en-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+  }
+
+  // Utility: Format time ago
+  function timeAgo(timestamp) {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const seconds = Math.floor((now - date) / 1000);
+    
+    if (seconds < 60) return "Just now";
+    
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} min ago`;
+    
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hr ago`;
+    
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+    
+    return formatTimestamp(timestamp);
+  }
+
+  // Sort bids based on current selection
+  function sortBids() {
+    switch(currentSort) {
+      case "amount-desc":
+        bids.sort((a, b) => b.amount - a.amount);
+        break;
+      case "amount-asc":
+        bids.sort((a, b) => a.amount - b.amount);
+        break;
+      case "date-desc":
+        bids.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        break;
+      case "date-asc":
+        bids.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        break;
+    }
+    renderBids();
+  }
+
+  // Render bids up to visibleCount
+  function renderBids() {
+    bidsSection.innerHTML = "";
+    bidCount.textContent = `(${bids.length})`;
+    
+    for (let i = 0; i < Math.min(visibleCount, bids.length); i++) {
+      const bid = bids[i];
+      const div = document.createElement("div");
+      div.className = "bid-row";
+      if (i === 0 && currentSort === "amount-desc") div.classList.add("highlight");
+      div.setAttribute("tabindex", "0");
+      
+      // Add badge for top bid
+      const badge = i === 0 && currentSort === "amount-desc" ? '<span class="bidder-badge">HIGHEST</span>' : '';
+      
+      div.innerHTML = `
+        <div class="bid-info">
+          <div>
+            <span class="bidder-name">${bid.bidderName}</span>
+            ${badge}
+          </div>
+          <div class="bid-time-ago">${timeAgo(bid.timestamp)}</div>
+        </div>
+        <div class="bid-amount">${formatCurrency(bid.amount)}</div>
+        <time class="bid-timestamp" datetime="${bid.timestamp}">${formatTimestamp(bid.timestamp)}</time>
+        <div class="bid-contact">
+          <button class="contact-button" onclick="messageBidder('${bid.contact}', '${bid.bidderName}')">
+            <i class="fas fa-envelope"></i> Message
+          </button>
+        </div>
+      `;
+      bidsSection.appendChild(div);
+    }
+    
+    // Hide see more if all visible
+    if (visibleCount >= bids.length) {
+      seeMoreBtn.style.display = "none";
+    } else {
+      seeMoreBtn.style.display = "flex";
+    }
+  }
+
+  // Show toast notification
+  function showToast(message) {
+    toastMessage.textContent = message;
+    toast.classList.add("show");
+    
+    setTimeout(() => {
+      toast.classList.remove("show");
+    }, 3000);
+  }
+
+  // Message bidder action
+  function messageBidder(email, name) {
+    alert(`Message action for bidder: ${name} (${email})`);
+  }
+
+  // Submit a new bid
+  function submitBid() {
+    const amount = parseInt(bidAmountInput.value);
+    const name = bidderNameInput.value.trim();
+    const email = bidderEmailInput.value.trim();
+    
+    if (!amount || amount < bidAmountInput.min) {
+      showToast(`Bid must be at least ${formatCurrency(bidAmountInput.min)}`);
+      bidAmountInput.focus();
+      return;
+    }
+    
+    if (!name) {
+      showToast("Please enter your name");
+      bidderNameInput.focus();
+      return;
+    }
+    
+    if (!email || !email.includes('@')) {
+      showToast("Please enter a valid email address");
+      bidderEmailInput.focus();
+      return;
+    }
+    
+    // Create new bid
+    const newBid = {
+      bidderName: name,
+      amount: amount,
+      timestamp: new Date().toISOString(),
+      contact: email
+    };
+    
+    // Add to bids array and sort
+    bids.unshift(newBid);
+    sortBids();
+    
+    // Reset form
+    bidAmountInput.value = "";
+    bidderNameInput.value = "";
+    bidderEmailInput.value = "";
+    bidAmountInput.min = amount + 50000;
+    
+    // Show success message
+    showToast("Your bid has been placed successfully!");
+    
+    // Scroll to top to see the new bid
+    bidsSection.scrollTop = 0;
+  }
+
+  // Event listeners
+  seeMoreBtn.addEventListener("click", () => {
+    visibleCount += 3;
+    renderBids();
+  });
+
+  sortSelect.addEventListener("change", () => {
+    currentSort = sortSelect.value;
+    sortBids();
+  });
+
+  submitBidButton.addEventListener("click", submitBid);
+
+  // Timer countdown from fixed 30 minutes for demo
+  let countdownSeconds = 1800; // 30 minutes
+  const timerElement = document.querySelector(".timer");
+  const timerWarning = document.querySelector(".timer-warning");
+
+  function updateTimer() {
+    const hrs = String(Math.floor(countdownSeconds / 3600)).padStart(2, "0");
+    const mins = String(Math.floor((countdownSeconds % 3600) / 60)).padStart(2, "0");
+    const secs = String(countdownSeconds % 60).padStart(2, "0");
+    timerElement.textContent = `${hrs}:${mins}:${secs}`;
+
+    // Add warning when time is running low
+    if (countdownSeconds < 300) { // 5 minutes
+      timerElement.classList.add("pulse");
+      timerWarning.style.display = "block";
+    }
+
+    if (countdownSeconds > 0) {
+      countdownSeconds--;
+    } else {
+      timerElement.textContent = "Bidding Closed";
+      timerWarning.textContent = "Auction has ended";
+      seeMoreBtn.disabled = true;
+      submitBidButton.disabled = true;
+      clearInterval(timerInterval);
+    }
+  }
+
+  const timerInterval = setInterval(updateTimer, 1000);
+  
+  // Initialize
+  sortBids();
+  updateTimer();
+</script>
+
+</body>
+</html>
