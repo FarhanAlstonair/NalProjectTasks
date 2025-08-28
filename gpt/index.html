@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-color-scheme="light" > 
+    <!-- data-color-scheme="light"> -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,10 +23,6 @@
                 <i class="nav-icon fas fa-home"></i>
                 <span>Manage Property</span>
             </a>
-            <!-- <a href="#" class="nav-item" data-view="properties">
-                <i class="nav-icon fas fa-building"></i>
-                <span>Manage Properties</span>
-            </a> -->
             <a href="#" class="nav-item" data-view="notifications">
                 <i class="nav-icon fas fa-bell"></i>
                 <span>Notifications</span>
@@ -54,7 +51,6 @@
                 </div>
                 <div class="search-container">
                     <input type="text" class="form-control search-input" placeholder="Search properties..." id="searchInput">
-                    
                 </div>
             </div>
 
@@ -75,33 +71,6 @@
                         <i class="fas fa-plus"></i> Add Property
                     </button>
                 </div>
-            </div>
-        </div>
-
-        <!-- Properties Management View -->
-        <div id="properties-view" class="view hidden">
-            <div class="view-header">
-                <h1>Manage Properties</h1>
-                <button class="btn btn--primary" onclick="showFormWizard()">
-                    <i class="fas fa-plus"></i> Add Property
-                </button>
-            </div>
-            
-            <div class="properties-table-container">
-                <table class="properties-table">
-                    <thead>
-                        <tr>
-                            <th>Property</th>
-                            <th>Type</th>
-                            <th>Price</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="propertiesTableBody">
-                        <!-- Table rows will be dynamically loaded -->
-                    </tbody>
-                </table>
             </div>
         </div>
 
@@ -139,7 +108,7 @@
             <div class="bidding-container">
                 <div class="bidding-timer-card">
                     <div class="timer-header">
-                        <h3>Bidding Ends In</h3>
+                        <h3>Bidding Status</h3>
                     </div>
                     <div class="countdown-timer" id="countdownTimer">
                         <span class="timer-digit">00</span>:<span class="timer-digit">20</span>
@@ -270,7 +239,7 @@
 
                 <!-- Step 2: Documents -->
                 <div class="wizard-step hidden" id="step2">
-                    <h3>Upload Documents</h3>
+                    <h3>Upload Documents (Optional)</h3>
                     <div class="upload-section">
                         <div class="upload-item">
                             <label class="form-label">Sale Deed</label>
@@ -408,18 +377,18 @@
 
                 <!-- Step 5: Photos & Videos -->
                 <div class="wizard-step hidden" id="step5">
-                    <h3>Photos & Videos</h3>
+                    <h3>Photos & Videos (Optional)</h3>
                     <div class="image-upload-section">
-                        <div class="upload-area" id="imageUploadArea">
-                            <input type="file" id="imageUpload" multiple accept="image/*" style="display: none;">
-                            <div class="upload-placeholder" onclick="document.getElementById('imageUpload').click()">
+                        <div class="upload-area" id="mediaUploadArea" onclick="document.getElementById('mediaUpload').click()">
+                            <input type="file" id="mediaUpload" multiple accept="image/*,video/*" style="display: none;">
+                            <div class="upload-placeholder">
                                 <i class="fas fa-camera upload-icon"></i>
-                                <p>Click to upload images</p>
-                                <p class="upload-hint">Max 5 images, 2MB per image</p>
+                                <p>Click to upload images & videos</p>
+                                <p class="upload-hint">Max 5 files, Images: 3MB, Videos: 10MB</p>
                             </div>
                         </div>
-                        <div class="image-preview-grid" id="imagePreviewGrid">
-                            <!-- Image previews will be added here -->
+                        <div class="image-preview-grid" id="mediaPreviewGrid">
+                            <!-- Media previews will be added here -->
                         </div>
                     </div>
                 </div>
@@ -486,6 +455,30 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn--secondary" onclick="closeBidderModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bidding End Notification Modal -->
+    <div class="modal hidden" id="biddingEndModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎉 Bidding Completed</h2>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 2rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
+                <h3 style="margin-bottom: 1rem;">Bidding has successfully ended!</h3>
+                <p style="margin-bottom: 1.5rem; color: var(--color-text-secondary);">
+                    The property has been sold to the highest bidder. You can review all bids and bidder details in the bidding dashboard.
+                </p>
+                <div id="winningBidDetails" style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+                    <!-- Winning bid details will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="btn btn--primary" onclick="closeBiddingEndModal()">
+                    <i class="fas fa-check"></i> Understood
+                </button>
             </div>
         </div>
     </div>

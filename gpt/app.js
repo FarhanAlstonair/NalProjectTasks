@@ -1,17 +1,18 @@
-// NAL India Property Management System JavaScript
+ // NAL India Property Management System JavaScript - Complete Working Version
 
 // Global State
 let currentStep = 1;
 let currentPropertyId = null;
 let editingProperty = false;
 let formData = {};
-let uploadedImages = [];
+let uploadedMedia = []; // Support both images and videos
 let properties = [];
 let deletePropertyId = null;
 let autoSaveInterval = null;
 let currentBiddingProperty = null;
 let biddingTimer = null;
-let timeLeft = 10; // 10 seconds for demo
+let timeLeft = 20; // 20 seconds for demo
+let biddingEndShown = false; // Flag to prevent repeated modal showing
 
 // Sample Properties Data
 const sampleProperties = [
@@ -31,6 +32,7 @@ const sampleProperties = [
         status: "active",
         badges: ["SALE", "ACTIVE", "URGENT SALE", "BIDDING"],
         biddingEnabled: true,
+        biddingHistory: false,
         urgentSale: true,
         isDraft: false,
         listingIntent: "urgent-sale",
@@ -55,6 +57,7 @@ const sampleProperties = [
         status: "active",
         badges: ["SALE", "ACTIVE"],
         biddingEnabled: false,
+        biddingHistory: false,
         urgentSale: false,
         isDraft: false,
         listingIntent: "sale",
@@ -79,6 +82,7 @@ const sampleProperties = [
         status: "sold",
         badges: ["SOLD"],
         biddingEnabled: false,
+        biddingHistory: true, // Property had bidding history
         urgentSale: false,
         isDraft: false,
         listingIntent: "sale",
@@ -103,6 +107,7 @@ const sampleProperties = [
         status: "draft",
         badges: ["DRAFT"],
         biddingEnabled: false,
+        biddingHistory: false,
         urgentSale: false,
         isDraft: true,
         listingIntent: "sale",
@@ -127,6 +132,7 @@ const sampleProperties = [
         status: "active",
         badges: ["SALE", "ACTIVE", "BIDDING"],
         biddingEnabled: true,
+        biddingHistory: false,
         urgentSale: false,
         isDraft: false,
         listingIntent: "sale",
@@ -159,12 +165,10 @@ document.addEventListener('DOMContentLoaded', function() {
     loadProperties();
     setupEventListeners();
     showView('dashboard');
-    
-    // Setup auto-save
     setupAutoSave();
     
     // Load draft if exists
-    const draft = localStorage.getItem('propertyDraft');
+    const draft = localStorage.getItem('nalIndiaPropertyDraft');
     if (draft) {
         console.log('Draft found in localStorage');
     }
@@ -189,16 +193,18 @@ function setupEventListeners() {
     const mobileToggle = document.getElementById('mobileMenuToggle');
     const sidebar = document.querySelector('.sidebar');
     
-    mobileToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-    });
+    if (mobileToggle && sidebar) {
+        mobileToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
 
-    // Close mobile menu when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
-            sidebar.classList.remove('open');
-        }
-    });
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+    }
 
     // Filter tabs
     document.querySelectorAll('.filter-tab').forEach(tab => {
@@ -210,15 +216,24 @@ function setupEventListeners() {
     });
 
     // State change handler
-    document.getElementById('state').addEventListener('change', updateCities);
+    const stateSelect = document.getElementById('state');
+    if (stateSelect) {
+        stateSelect.addEventListener('change', updateCities);
+    }
 
-    // Image upload handler
-    document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
+    // Media upload handler
+    const mediaUpload = document.getElementById('mediaUpload');
+    if (mediaUpload) {
+        mediaUpload.addEventListener('change', handleMediaUpload);
+    }
 
     // Search handler
-    document.getElementById('searchInput').addEventListener('input', filterProperties);
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', filterProperties);
+    }
 
-    // Form validation on input
+    // Form validation
     setupFormValidation();
 }
 
@@ -237,8 +252,6 @@ function showView(viewName) {
         // Load data for specific views
         if (viewName === 'dashboard') {
             renderPropertiesGrid();
-        } else if (viewName === 'properties') {
-            renderPropertiesTable();
         } else if (viewName === 'bidding') {
             renderBiddingDashboard();
         }
@@ -251,7 +264,6 @@ function loadProperties() {
     if (savedProperties) {
         properties = JSON.parse(savedProperties);
     } else {
-        // Load sample data
         properties = [...sampleProperties];
         saveProperties();
     }
@@ -294,7 +306,10 @@ function renderPropertiesGrid() {
                 </div>
                 <div class="property-price">₹${formatPrice(property.price)}</div>
                 <div class="property-actions">
-                    ${property.biddingEnabled ? `<button class="btn-bidding" onclick="showBiddingDashboard(${property.id})">Bidding</button>` : ''}
+                    ${(property.biddingEnabled || property.biddingHistory) ? 
+                        `<button class="btn-bidding" onclick="showBiddingDashboard(${property.id})">
+                            ${property.status === 'sold' ? 'View Bids' : 'Bidding'}
+                        </button>` : ''}
                     <button class="btn btn--sm btn--outline" onclick="editProperty('${property.id}')">Edit</button>
                     <button class="btn-icon delete" onclick="showDeleteModal('${property.id}')" title="Delete">
                         <i class="fas fa-trash"></i>
@@ -318,48 +333,44 @@ function generateBadges(property) {
     return badges.join('');
 }
 
-function renderPropertiesTable() {
-    const tbody = document.getElementById('propertiesTableBody');
-    
-    tbody.innerHTML = properties.map(property => `
-        <tr>
-            <td>
-                <div>
-                    <strong>${property.title}</strong><br>
-                    <small class="text-secondary">${property.address}</small>
-                </div>
-            </td>
-            <td>${property.propertyType}</td>
-            <td>₹${formatPrice(property.price)}</td>
-            <td><span class="property-status status-${property.status}">${property.status.charAt(0).toUpperCase() + property.status.slice(1)}</span></td>
-            <td>
-                <button class="btn btn--sm btn--outline" onclick="editProperty('${property.id}')">Edit</button>
-                <button class="btn-icon delete" onclick="showDeleteModal('${property.id}')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
-}
-
 // Bidding Dashboard Functions
 function showBiddingDashboard(propertyId) {
     currentBiddingProperty = properties.find(p => p.id == propertyId);
     if (!currentBiddingProperty) return;
     
     showView('bidding');
-    timeLeft = 10; // Reset timer to 10 seconds for demo
-    startBiddingTimer();
+    biddingEndShown = false; // Reset flag
     
-    document.getElementById('biddingPropertyTitle').textContent = currentBiddingProperty.title;
+    // Only start timer if bidding is still active
+    if (currentBiddingProperty.biddingEnabled && currentBiddingProperty.status !== 'sold') {
+        timeLeft = 20; // Reset timer
+        startBiddingTimer();
+    } else {
+        // Property already sold, show ended status
+        const timerDisplay = document.getElementById('countdownTimer');
+        const timerStatus = document.getElementById('timerStatus');
+        if (timerDisplay && timerStatus) {
+            timerDisplay.innerHTML = '<span class="timer-digit">00</span>:<span class="timer-digit">00</span>';
+            timerStatus.textContent = 'Bidding Ended';
+            timerStatus.classList.add('timer-ended');
+        }
+    }
+    
+    const titleElement = document.getElementById('biddingPropertyTitle');
+    if (titleElement) {
+        titleElement.textContent = currentBiddingProperty.title;
+    }
     renderBidsTable();
 }
 
 function renderBiddingDashboard() {
     if (currentBiddingProperty) {
-        document.getElementById('biddingPropertyTitle').textContent = currentBiddingProperty.title;
+        const titleElement = document.getElementById('biddingPropertyTitle');
+        if (titleElement) {
+            titleElement.textContent = currentBiddingProperty.title;
+        }
         renderBidsTable();
-        if (!biddingTimer) {
+        if (!biddingTimer && currentBiddingProperty.biddingEnabled && currentBiddingProperty.status !== 'sold') {
             startBiddingTimer();
         }
     }
@@ -368,6 +379,8 @@ function renderBiddingDashboard() {
 function startBiddingTimer() {
     const timerDisplay = document.getElementById('countdownTimer');
     const timerStatus = document.getElementById('timerStatus');
+    
+    if (!timerDisplay || !timerStatus) return;
     
     biddingTimer = setInterval(() => {
         const minutes = Math.floor(timeLeft / 60);
@@ -384,13 +397,17 @@ function startBiddingTimer() {
             timerStatus.textContent = 'Bidding Ended';
             timerStatus.classList.add('timer-ended');
             
-            // Show toast notification
-            showToast('Bidding has ended! Property status updated.', 'success');
+            // Show center modal instead of toast - only once
+            if (!biddingEndShown) {
+                showBiddingEndModal();
+                biddingEndShown = true;
+            }
             
             // Update property status
             if (currentBiddingProperty) {
                 currentBiddingProperty.status = 'sold';
                 currentBiddingProperty.biddingEnabled = false;
+                currentBiddingProperty.biddingHistory = true;
                 saveProperties();
                 renderPropertiesGrid();
             }
@@ -400,8 +417,39 @@ function startBiddingTimer() {
     }, 1000);
 }
 
+function showBiddingEndModal() {
+    const modal = document.getElementById('biddingEndModal');
+    const winningBidDetails = document.getElementById('winningBidDetails');
+    
+    if (!modal || !winningBidDetails) return;
+    
+    // Get highest bidder
+    const sortedBids = [...sampleBids].sort((a, b) => b.amount - a.amount);
+    const winningBid = sortedBids[0];
+    
+    if (winningBid) {
+        winningBidDetails.innerHTML = `
+            <h4 style="margin-bottom: 0.5rem; color: var(--color-success);">🏆 Winning Bid</h4>
+            <p><strong>Winner:</strong> ${winningBid.bidderName}</p>
+            <p><strong>Winning Amount:</strong> ₹${formatPrice(winningBid.amount)}</p>
+            <p><strong>Total Bids:</strong> ${sampleBids.length}</p>
+        `;
+    }
+    
+    modal.classList.remove('hidden');
+}
+
+function closeBiddingEndModal() {
+    const modal = document.getElementById('biddingEndModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
 function renderBidsTable() {
     const tbody = document.getElementById('bidsTableBody');
+    if (!tbody) return;
+    
     const sortedBids = [...sampleBids].sort((a, b) => b.amount - a.amount);
     
     tbody.innerHTML = sortedBids.map((bid, index) => `
@@ -426,6 +474,8 @@ function showBidderProfile(bidderId) {
     
     const modal = document.getElementById('bidderModal');
     const content = document.getElementById('bidderProfileContent');
+    
+    if (!modal || !content) return;
     
     content.innerHTML = `
         <div style="text-align: center; margin-bottom: 1.5rem;">
@@ -459,13 +509,18 @@ function showBidderProfile(bidderId) {
 }
 
 function closeBidderModal() {
-    document.getElementById('bidderModal').classList.add('hidden');
+    const modal = document.getElementById('bidderModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
 }
 
 // Form Wizard Functions
 function showFormWizard(propertyId = null) {
     const modal = document.getElementById('formWizardModal');
     const title = document.getElementById('wizardTitle');
+    
+    if (!modal || !title) return;
     
     currentPropertyId = propertyId;
     editingProperty = !!propertyId;
@@ -487,14 +542,16 @@ function showFormWizard(propertyId = null) {
 
 function closeFormWizard() {
     const modal = document.getElementById('formWizardModal');
-    modal.classList.add('hidden');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
     resetForm();
     clearAutoSave();
 }
 
 function resetForm() {
     formData = {};
-    uploadedImages = [];
+    uploadedMedia = [];
     currentStep = 1;
     editingProperty = false;
     currentPropertyId = null;
@@ -508,8 +565,11 @@ function resetForm() {
         }
     });
     
-    // Clear image preview
-    document.getElementById('imagePreviewGrid').innerHTML = '';
+    // Clear media preview
+    const previewGrid = document.getElementById('mediaPreviewGrid');
+    if (previewGrid) {
+        previewGrid.innerHTML = '';
+    }
 }
 
 function showStep(step) {
@@ -541,15 +601,15 @@ function showStep(step) {
     const nextBtn = document.getElementById('nextBtn');
     const submitBtn = document.getElementById('submitBtn');
     
-    prevBtn.style.display = step > 1 ? 'block' : 'none';
+    if (prevBtn) prevBtn.style.display = step > 1 ? 'block' : 'none';
     
     if (step === 6) {
-        nextBtn.classList.add('hidden');
-        submitBtn.classList.remove('hidden');
+        if (nextBtn) nextBtn.classList.add('hidden');
+        if (submitBtn) submitBtn.classList.remove('hidden');
         populateReviewSection();
     } else {
-        nextBtn.classList.remove('hidden');
-        submitBtn.classList.add('hidden');
+        if (nextBtn) nextBtn.classList.remove('hidden');
+        if (submitBtn) submitBtn.classList.add('hidden');
     }
     
     currentStep = step;
@@ -574,8 +634,10 @@ function prevStep() {
 
 function updateProgressBar() {
     const progressFill = document.getElementById('progressFill');
-    const percentage = (currentStep / 6) * 100;
-    progressFill.style.width = `${percentage}%`;
+    if (progressFill) {
+        const percentage = (currentStep / 6) * 100;
+        progressFill.style.width = `${percentage}%`;
+    }
 }
 
 function validateStep(step) {
@@ -584,11 +646,11 @@ function validateStep(step) {
     
     switch(step) {
         case 1:
-            const title = document.getElementById('propertyTitle').value;
-            const type = document.getElementById('propertyType').value;
-            const address = document.getElementById('address').value;
-            const area = document.getElementById('area').value;
-            const price = document.getElementById('price').value;
+            const title = document.getElementById('propertyTitle')?.value;
+            const type = document.getElementById('propertyType')?.value;
+            const address = document.getElementById('address')?.value;
+            const area = document.getElementById('area')?.value;
+            const price = document.getElementById('price')?.value;
             
             if (!title) errorMessages.push('Property title is required');
             if (!type) errorMessages.push('Property type is required');
@@ -603,14 +665,14 @@ function validateStep(step) {
             break;
             
         case 4:
-            const state = document.getElementById('state').value;
-            const city = document.getElementById('city').value;
+            const state = document.getElementById('state')?.value;
+            const city = document.getElementById('city')?.value;
             if (!state) errorMessages.push('State is required');
             if (!city) errorMessages.push('City is required');
             break;
             
         case 6:
-            const declaration = document.getElementById('declaration').checked;
+            const declaration = document.getElementById('declaration')?.checked;
             if (!declaration) errorMessages.push('Please accept the declaration');
             break;
     }
@@ -626,16 +688,16 @@ function validateStep(step) {
 function saveStepData(step) {
     switch(step) {
         case 1:
-            formData.title = document.getElementById('propertyTitle').value;
-            formData.propertyType = document.getElementById('propertyType').value;
-            formData.address = document.getElementById('address').value;
-            formData.zipCode = document.getElementById('zipCode').value;
-            formData.beds = parseInt(document.getElementById('bedrooms').value) || 0;
-            formData.baths = parseInt(document.getElementById('bathrooms').value) || 0;
-            formData.area = parseInt(document.getElementById('area').value) || 0;
-            formData.price = parseInt(document.getElementById('price').value) || 0;
-            formData.yearBuilt = parseInt(document.getElementById('yearBuilt').value) || null;
-            formData.possession = document.getElementById('possession').value;
+            formData.title = document.getElementById('propertyTitle')?.value || '';
+            formData.propertyType = document.getElementById('propertyType')?.value || '';
+            formData.address = document.getElementById('address')?.value || '';
+            formData.zipCode = document.getElementById('zipCode')?.value || '';
+            formData.beds = parseInt(document.getElementById('bedrooms')?.value) || 0;
+            formData.baths = parseInt(document.getElementById('bathrooms')?.value) || 0;
+            formData.area = parseInt(document.getElementById('area')?.value) || 0;
+            formData.price = parseInt(document.getElementById('price')?.value) || 0;
+            formData.yearBuilt = parseInt(document.getElementById('yearBuilt')?.value) || null;
+            formData.possession = document.getElementById('possession')?.value || '';
             break;
             
         case 2:
@@ -645,18 +707,18 @@ function saveStepData(step) {
         case 3:
             const intent = document.querySelector('input[name="listingIntent"]:checked');
             formData.listingIntent = intent ? intent.value : '';
-            formData.biddingEnabled = document.getElementById('enableBidding').checked;
+            formData.biddingEnabled = document.getElementById('enableBidding')?.checked || false;
             formData.urgentSale = intent ? intent.value === 'urgent-sale' : false;
             break;
             
         case 4:
-            formData.state = document.getElementById('state').value;
-            formData.city = document.getElementById('city').value;
+            formData.state = document.getElementById('state')?.value || '';
+            formData.city = document.getElementById('city')?.value || '';
             
             // Get selected amenities
             const amenities = [];
             document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-                if (cb.value !== 'enableBidding') { // Exclude the bidding checkbox
+                if (cb.value !== 'enableBidding') {
                     amenities.push(cb.value);
                 }
             });
@@ -664,16 +726,20 @@ function saveStepData(step) {
             break;
             
         case 5:
-            formData.images = uploadedImages;
+            formData.images = uploadedMedia.filter(item => item.type === 'image').map(item => item.url);
+            formData.videos = uploadedMedia.filter(item => item.type === 'video').map(item => item.url);
             break;
     }
 }
 
 function populateReviewSection() {
     const reviewContent = document.getElementById('reviewContent');
+    if (!reviewContent) return;
     
-    // Save current step data
     saveStepData(currentStep - 1);
+    
+    const imageCount = uploadedMedia.filter(item => item.type === 'image').length;
+    const videoCount = uploadedMedia.filter(item => item.type === 'video').length;
     
     reviewContent.innerHTML = `
         <div class="review-item">
@@ -713,8 +779,8 @@ function populateReviewSection() {
             <span class="review-value">${formData.biddingEnabled ? 'Yes' : 'No'}</span>
         </div>
         <div class="review-item">
-            <span class="review-label">Images:</span>
-            <span class="review-value">${uploadedImages.length} image(s)</span>
+            <span class="review-label">Media:</span>
+            <span class="review-value">${imageCount} image(s), ${videoCount} video(s)</span>
         </div>
         <div class="review-item">
             <span class="review-label">Amenities:</span>
@@ -723,58 +789,78 @@ function populateReviewSection() {
     `;
 }
 
-// Image Handling
-function handleImageUpload(event) {
+// Media Handling - Support both images and videos
+function handleMediaUpload(event) {
     const files = event.target.files;
     
-    if (uploadedImages.length + files.length > 5) {
-        showToast('Maximum 5 images allowed', 'error');
+    if (uploadedMedia.length + files.length > 5) {
+        showToast('Maximum 5 files allowed', 'error');
         return;
     }
     
     for (let file of files) {
-        if (file.size > 2 * 1024 * 1024) { // 2MB limit
-            showToast('Image size should be less than 2MB', 'error');
+        let isValid = false;
+        let maxSize = 0;
+        let fileType = '';
+        
+        if (file.type.startsWith('image/')) {
+            maxSize = 3 * 1024 * 1024; // 3MB for images
+            fileType = 'image';
+            isValid = true;
+        } else if (file.type.startsWith('video/')) {
+            maxSize = 10 * 1024 * 1024; // 10MB for videos
+            fileType = 'video';
+            isValid = true;
+        }
+        
+        if (!isValid) {
+            showToast('Please select only image or video files', 'error');
             continue;
         }
         
-        if (!file.type.startsWith('image/')) {
-            showToast('Please select only image files', 'error');
+        if (file.size > maxSize) {
+            const sizeText = fileType === 'image' ? '3MB' : '10MB';
+            showToast(`${fileType === 'image' ? 'Image' : 'Video'} size should be less than ${sizeText}`, 'error');
             continue;
         }
         
         const reader = new FileReader();
         reader.onload = function(e) {
-            const imageData = {
+            const mediaData = {
                 id: Date.now() + Math.random(),
                 url: e.target.result,
                 name: file.name,
-                size: file.size
+                size: file.size,
+                type: fileType
             };
             
-            uploadedImages.push(imageData);
-            renderImagePreviews();
+            uploadedMedia.push(mediaData);
+            renderMediaPreviews();
         };
         reader.readAsDataURL(file);
     }
 }
 
-function renderImagePreviews() {
-    const grid = document.getElementById('imagePreviewGrid');
+function renderMediaPreviews() {
+    const grid = document.getElementById('mediaPreviewGrid');
+    if (!grid) return;
     
-    grid.innerHTML = uploadedImages.map((image, index) => `
+    grid.innerHTML = uploadedMedia.map((media, index) => `
         <div class="image-preview ${index === 0 ? 'cover' : ''}" draggable="true" data-index="${index}">
-            <img src="${image.url}" alt="${image.name}">
-            <button class="image-preview-overlay" onclick="removeImage(${index})">×</button>
-            ${index === 0 ? '<div class="cover-badge">Cover Photo</div>' : ''}
+            ${media.type === 'image' 
+                ? `<img src="${media.url}" alt="${media.name}">`
+                : `<video src="${media.url}"></video>`
+            }
+            <button class="image-preview-overlay" onclick="removeMedia(${index})">×</button>
+            ${index === 0 ? '<div class="cover-badge">Cover Media</div>' : ''}
+            ${media.type === 'video' ? '<div style="position: absolute; top: 0.5rem; left: 0.5rem; background: rgba(0,0,0,0.7); color: white; padding: 0.25rem; border-radius: 0.25rem; font-size: 0.75rem;"><i class="fas fa-play"></i></div>' : ''}
         </div>
     `).join('');
     
-    // Add drag and drop functionality
-    setupImageDragDrop();
+    setupMediaDragDrop();
 }
 
-function setupImageDragDrop() {
+function setupMediaDragDrop() {
     const previews = document.querySelectorAll('.image-preview');
     
     previews.forEach(preview => {
@@ -797,30 +883,31 @@ function setupImageDragDrop() {
             const dropIndex = parseInt(e.target.closest('.image-preview').dataset.index);
             
             if (dragIndex !== dropIndex) {
-                reorderImages(dragIndex, dropIndex);
+                reorderMedia(dragIndex, dropIndex);
             }
         });
     });
 }
 
-function reorderImages(fromIndex, toIndex) {
-    const [movedImage] = uploadedImages.splice(fromIndex, 1);
-    uploadedImages.splice(toIndex, 0, movedImage);
-    renderImagePreviews();
+function reorderMedia(fromIndex, toIndex) {
+    const [movedMedia] = uploadedMedia.splice(fromIndex, 1);
+    uploadedMedia.splice(toIndex, 0, movedMedia);
+    renderMediaPreviews();
 }
 
-function removeImage(index) {
-    uploadedImages.splice(index, 1);
-    renderImagePreviews();
+function removeMedia(index) {
+    uploadedMedia.splice(index, 1);
+    renderMediaPreviews();
 }
 
 // State and City Management
 function updateCities() {
     const stateSelect = document.getElementById('state');
     const citySelect = document.getElementById('city');
+    if (!stateSelect || !citySelect) return;
+    
     const selectedState = stateSelect.value;
     
-    // Clear cities
     citySelect.innerHTML = '<option value="">Select City</option>';
     
     if (selectedState && statesAndCities[selectedState]) {
@@ -842,23 +929,35 @@ function loadPropertyForEdit(propertyId) {
     const property = properties.find(p => p.id == propertyId);
     if (!property) return;
     
-    // Populate form fields
-    document.getElementById('propertyTitle').value = property.title || '';
-    document.getElementById('propertyType').value = property.propertyType || '';
-    document.getElementById('address').value = property.address || '';
-    document.getElementById('zipCode').value = property.zipCode || '';
-    document.getElementById('bedrooms').value = property.beds || '';
-    document.getElementById('bathrooms').value = property.baths || '';
-    document.getElementById('area').value = property.area || '';
-    document.getElementById('price').value = property.price || '';
-    document.getElementById('yearBuilt').value = property.yearBuilt || '';
-    document.getElementById('possession').value = property.possession || '';
-    document.getElementById('state').value = property.state || '';
+    // Populate form fields safely
+    const fields = [
+        { id: 'propertyTitle', value: property.title },
+        { id: 'propertyType', value: property.propertyType },
+        { id: 'address', value: property.address },
+        { id: 'zipCode', value: property.zipCode },
+        { id: 'bedrooms', value: property.beds },
+        { id: 'bathrooms', value: property.baths },
+        { id: 'area', value: property.area },
+        { id: 'price', value: property.price },
+        { id: 'yearBuilt', value: property.yearBuilt },
+        { id: 'possession', value: property.possession },
+        { id: 'state', value: property.state }
+    ];
+    
+    fields.forEach(field => {
+        const element = document.getElementById(field.id);
+        if (element && field.value !== undefined) {
+            element.value = field.value;
+        }
+    });
     
     // Update cities and set city
     updateCities();
     setTimeout(() => {
-        document.getElementById('city').value = property.city || '';
+        const cityElement = document.getElementById('city');
+        if (cityElement && property.city) {
+            cityElement.value = property.city;
+        }
     }, 100);
     
     // Set listing intent
@@ -868,7 +967,10 @@ function loadPropertyForEdit(propertyId) {
     }
     
     // Set bidding enabled
-    document.getElementById('enableBidding').checked = property.biddingEnabled || false;
+    const biddingCheckbox = document.getElementById('enableBidding');
+    if (biddingCheckbox) {
+        biddingCheckbox.checked = property.biddingEnabled || false;
+    }
     
     // Set amenities
     if (property.amenities) {
@@ -879,51 +981,64 @@ function loadPropertyForEdit(propertyId) {
     }
     
     // Load images
-    uploadedImages = property.images?.map(url => ({
+    uploadedMedia = property.images?.map(url => ({
         id: Date.now() + Math.random(),
         url: url,
         name: 'existing-image.jpg',
-        size: 0
+        size: 0,
+        type: 'image'
     })) || [];
     
-    renderImagePreviews();
+    renderMediaPreviews();
 }
 
 function submitProperty() {
     if (!validateStep(6)) return;
     
-    saveStepData(6);
-    
-    const propertyData = {
-        id: currentPropertyId || Date.now(),
-        ...formData,
-        images: uploadedImages.map(img => img.url),
-        status: editingProperty ? (properties.find(p => p.id == currentPropertyId)?.status || 'active') : 'active',
-        isDraft: false,
-        badges: []
-    };
-    
-    // Generate badges based on property data
-    if (propertyData.listingIntent === 'sale') propertyData.badges.push('SALE');
-    if (propertyData.status === 'active') propertyData.badges.push('ACTIVE');
-    if (propertyData.urgentSale) propertyData.badges.push('URGENT SALE');
-    if (propertyData.biddingEnabled) propertyData.badges.push('BIDDING');
-    
-    if (editingProperty) {
-        const index = properties.findIndex(p => p.id == currentPropertyId);
-        if (index !== -1) {
-            properties[index] = propertyData;
+    try {
+        saveStepData(6);
+        
+        const propertyData = {
+            id: currentPropertyId || Date.now(),
+            ...formData,
+            images: uploadedMedia.filter(item => item.type === 'image').map(img => img.url),
+            videos: uploadedMedia.filter(item => item.type === 'video').map(video => video.url),
+            status: editingProperty ? (properties.find(p => p.id == currentPropertyId)?.status || 'active') : 'active',
+            isDraft: false,
+            biddingHistory: editingProperty ? (properties.find(p => p.id == currentPropertyId)?.biddingHistory || false) : false,
+            badges: []
+        };
+        
+        // Generate badges
+        if (propertyData.listingIntent === 'sale') propertyData.badges.push('SALE');
+        if (propertyData.status === 'active') propertyData.badges.push('ACTIVE');
+        if (propertyData.urgentSale) propertyData.badges.push('URGENT SALE');
+        if (propertyData.biddingEnabled) propertyData.badges.push('BIDDING');
+        
+        if (editingProperty) {
+            const index = properties.findIndex(p => p.id == currentPropertyId);
+            if (index !== -1) {
+                properties[index] = propertyData;
+            }
+        } else {
+            properties.push(propertyData);
         }
-    } else {
-        properties.push(propertyData);
+        
+        saveProperties();
+        clearDraft();
+        
+        showToast(editingProperty ? 'Property updated successfully!' : 'Property added successfully!', 'success');
+        
+        // Close modal and refresh views with delay for smooth UX
+        setTimeout(() => {
+            closeFormWizard();
+            renderPropertiesGrid();
+        }, 500);
+        
+    } catch (error) {
+        console.error('Error submitting property:', error);
+        showToast('Error submitting property. Please try again.', 'error');
     }
-    
-    saveProperties();
-    clearDraft();
-    closeFormWizard();
-    showToast(editingProperty ? 'Property updated successfully!' : 'Property added successfully!', 'success');
-    renderPropertiesGrid();
-    renderPropertiesTable();
 }
 
 function showDeleteModal(propertyId) {
@@ -935,19 +1050,25 @@ function showDeleteModal(propertyId) {
     const modal = document.getElementById('deleteModal');
     const preview = document.getElementById('deletePropertyPreview');
     
-    preview.innerHTML = `
-        <h4>${property.title}</h4>
-        <p><strong>Type:</strong> ${property.propertyType}</p>
-        <p><strong>Address:</strong> ${property.address}</p>
-        <p><strong>Price:</strong> ₹${formatPrice(property.price)}</p>
-    `;
+    if (preview) {
+        preview.innerHTML = `
+            <h4>${property.title}</h4>
+            <p><strong>Type:</strong> ${property.propertyType}</p>
+            <p><strong>Address:</strong> ${property.address}</p>
+            <p><strong>Price:</strong> ₹${formatPrice(property.price)}</p>
+        `;
+    }
     
-    modal.classList.remove('hidden');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
 }
 
 function closeDeleteModal() {
     const modal = document.getElementById('deleteModal');
-    modal.classList.add('hidden');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
     deletePropertyId = null;
 }
 
@@ -958,7 +1079,6 @@ function confirmDelete() {
         closeDeleteModal();
         showToast('Property deleted successfully!', 'success');
         renderPropertiesGrid();
-        renderPropertiesTable();
     }
 }
 
@@ -967,7 +1087,7 @@ function saveDraft() {
     saveStepData(currentStep);
     const draftData = {
         formData,
-        uploadedImages,
+        uploadedMedia,
         currentStep
     };
     localStorage.setItem('nalIndiaPropertyDraft', JSON.stringify(draftData));
@@ -977,15 +1097,19 @@ function saveDraft() {
 function loadDraft() {
     const draft = localStorage.getItem('nalIndiaPropertyDraft');
     if (draft && !editingProperty) {
-        const draftData = JSON.parse(draft);
-        formData = draftData.formData || {};
-        uploadedImages = draftData.uploadedImages || [];
-        
-        // Populate form with draft data
-        populateFormWithData(formData);
-        renderImagePreviews();
-        
-        showToast('Draft loaded', 'success');
+        try {
+            const draftData = JSON.parse(draft);
+            formData = draftData.formData || {};
+            uploadedMedia = draftData.uploadedMedia || [];
+            
+            populateFormWithData(formData);
+            renderMediaPreviews();
+            
+            showToast('Draft loaded', 'success');
+        } catch (error) {
+            console.error('Error loading draft:', error);
+            clearDraft();
+        }
     }
 }
 
@@ -996,7 +1120,7 @@ function clearDraft() {
 function populateFormWithData(data) {
     Object.keys(data).forEach(key => {
         const field = document.getElementById(key);
-        if (field) {
+        if (field && data[key] !== undefined) {
             field.value = data[key];
         }
     });
@@ -1008,14 +1132,16 @@ function populateFormWithData(data) {
     }
     
     if (data.biddingEnabled) {
-        document.getElementById('enableBidding').checked = true;
+        const biddingCheckbox = document.getElementById('enableBidding');
+        if (biddingCheckbox) biddingCheckbox.checked = true;
     }
     
     if (data.state) {
         updateCities();
         setTimeout(() => {
             if (data.city) {
-                document.getElementById('city').value = data.city;
+                const cityElement = document.getElementById('city');
+                if (cityElement) cityElement.value = data.city;
             }
         }, 100);
     }
@@ -1031,14 +1157,15 @@ function populateFormWithData(data) {
 // Auto-save functionality
 function setupAutoSave() {
     autoSaveInterval = setInterval(() => {
-        if (document.getElementById('formWizardModal').classList.contains('hidden')) {
+        const modal = document.getElementById('formWizardModal');
+        if (!modal || modal.classList.contains('hidden')) {
             return;
         }
         
         saveStepData(currentStep);
         const draftData = {
             formData,
-            uploadedImages,
+            uploadedMedia,
             currentStep
         };
         localStorage.setItem('nalIndiaPropertyDraft', JSON.stringify(draftData));
@@ -1048,12 +1175,16 @@ function setupAutoSave() {
 function clearAutoSave() {
     if (autoSaveInterval) {
         clearInterval(autoSaveInterval);
+        autoSaveInterval = null;
     }
 }
 
 // Search and Filter Functions
 function filterProperties() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const searchInput = document.getElementById('searchInput');
+    if (!searchInput) return;
+    
+    const searchTerm = searchInput.value.toLowerCase();
     
     const filteredProperties = properties.filter(property => {
         const matchesSearch = !searchTerm || 
@@ -1112,7 +1243,10 @@ function renderFilteredProperties(filteredProperties) {
                 </div>
                 <div class="property-price">₹${formatPrice(property.price)}</div>
                 <div class="property-actions">
-                    ${property.biddingEnabled ? `<button class="btn-bidding" onclick="showBiddingDashboard(${property.id})">Bidding</button>` : ''}
+                    ${(property.biddingEnabled || property.biddingHistory) ? 
+                        `<button class="btn-bidding" onclick="showBiddingDashboard(${property.id})">
+                            ${property.status === 'sold' ? 'View Bids' : 'Bidding'}
+                        </button>` : ''}
                     <button class="btn btn--sm btn--outline" onclick="editProperty('${property.id}')">Edit</button>
                     <button class="btn-icon delete" onclick="showDeleteModal('${property.id}')" title="Delete">
                         <i class="fas fa-trash"></i>
@@ -1125,11 +1259,19 @@ function renderFilteredProperties(filteredProperties) {
 
 // Form Validation
 function setupFormValidation() {
-    // Add real-time validation
-    document.getElementById('propertyTitle').addEventListener('blur', validateRequired);
-    document.getElementById('address').addEventListener('blur', validateRequired);
-    document.getElementById('area').addEventListener('blur', validateNumber);
-    document.getElementById('price').addEventListener('blur', validateNumber);
+    const fields = [
+        { id: 'propertyTitle', validator: validateRequired },
+        { id: 'address', validator: validateRequired },
+        { id: 'area', validator: validateNumber },
+        { id: 'price', validator: validateNumber }
+    ];
+    
+    fields.forEach(field => {
+        const element = document.getElementById(field.id);
+        if (element) {
+            element.addEventListener('blur', field.validator);
+        }
+    });
 }
 
 function validateRequired(event) {
@@ -1154,6 +1296,7 @@ function validateNumber(event) {
 // Toast Notifications
 function showToast(message, type = 'success') {
     const container = document.getElementById('toastContainer');
+    if (!container) return;
     
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -1200,25 +1343,4 @@ function formatDateTime(timestamp) {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 }
 
-// Add slideOut animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-    
-    .dragging {
-        opacity: 0.5;
-        transform: rotate(5deg);
-    }
-`;
-document.head.appendChild(style);
-
-console.log('NAL India Property Management System initialized successfully');
+console.log('NAL India Property Management System initialized successfully - Complete Working Version');
